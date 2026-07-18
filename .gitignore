@@ -30,3 +30,4 @@ Thumbs.db
 
 # Hermes
 hermes-build/
+__pycache__/
