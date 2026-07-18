@@ -1,6 +1,6 @@
 # skill-writer — Hermes Meta-Skill
 
-Creates new Hermes Agent skills from a description. Given a topic and concept, generates a complete, sanitised skill package ready for the Hermes-Skills repo.
+Creates new Hermes Agent skills from a description. Given a topic and concept, generates a complete, sanitised skill package — then runs a 3-reviewer verification pipeline (DevOps, SecOps, AI Engineer), updates the root README, and commits. Ready for the Hermes-Skills repo.
 
 This is a **meta-skill**: it encodes the process I used to build every other skill in this repo. If you can describe what a skill should do, the skill-writer handles the rest.
 
@@ -37,7 +37,7 @@ export PEER_REVIEW_ENABLED=true
 | `HERMES_SKILLS_REPO_URL` | Yes | — | Git remote URL for the Hermes-Skills repo |
 | `SKILL_AUTHOR_NAME` | No | `Your Name` | Name for attribution |
 | `SKILL_AUTHOR_URL` | No | `https://github.com/your-username` | URL for attribution |
-| `PEER_REVIEW_ENABLED` | No | `true` | Run peer review sub-agent on output |
+| `PEER_REVIEW_ENABLED` | No | `true` | Run 3-reviewer verification pipeline (DevOps, SecOps, AI Engineer) |
 
 ## How to Use It
 
@@ -66,9 +66,12 @@ The skill-writer asks you questions, generates all files, runs a peer review, an
 3. **Generate SKILL.md** — full pipeline with config variables
 4. **Generate README.md** — installation and usage
 5. **Generate supporting files** — .gitignore, templates, references
-6. **Sanitize** — self-check for secrets, paths, hostnames
-7. **Peer review** — sub-agent reviews the output
-8. **Git commit** — adds and pushes to the repo
+6. **Sanitise** — self-check for secrets, paths, hostnames
+7. **3-reviewer verification** — DevOps (ops), SecOps (security), AI Engineer (quality) — in parallel
+8. **Validate** — optional `skills-ref validate` check
+9. **Git commit** — adds new skill directory
+10. **Root README update** — adds to skills table, install prompts, directory tree, slash commands
+11. **Report** — shows result, review summary, and install instructions
 
 ## Examples
 
