@@ -1,0 +1,24 @@
+# Excalidraw skill — .gitignore
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Generated diagram files (user-specific)
+*.excalidraw
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local

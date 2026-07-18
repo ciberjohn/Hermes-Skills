@@ -1,0 +1,24 @@
+# Secrets and credentials — never commit these
+.env
+*.token
+*_key
+*_secret
+credentials.json
+*.pem
+*.priv
+
+# Hermes-specific (per-profile, not per-skill)
+__pycache__/
+*.pyc
+*.pyo
+node_modules/
+
+# OS junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Git
+.git/

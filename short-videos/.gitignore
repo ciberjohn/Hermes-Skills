@@ -1,0 +1,43 @@
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+~*~
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Environment and secrets
+.env
+.env.*
+!env.example
+*.pem
+*.key
+
+# Node (if any)
+node_modules/
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+
+# Logs
+*.log
+
+# Temp files
+tmp/
+temp/
+
+# Video output
+*.mp4
+*.mov
+*.webm
+
+# Avoid committing the entire repo as a submodule
+.DS_Store
