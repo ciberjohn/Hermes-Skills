@@ -64,20 +64,20 @@ export REPO_ROOT=/path/to/your-content-repo
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `${REPO_ROOT}` | Yes | — | Absolute path to your Git content repository |
-| `${RP_VIDEO_DIR}` | No | `${REPO_ROOT}/short_videos` | Directory under the repo root for video folders |
+| `{{REPO_ROOT}}` | Yes | — | Absolute path to your Git content repository |
+| `{{RP_VIDEO_DIR}}` | No | `{{REPO_ROOT}}/short_videos` | Directory under the repo root for video folders |
 
-Set `${REPO_ROOT}` in your Hermes profile configuration or as an environment variable before running the pipeline.
+Set `{{REPO_ROOT}}` in your Hermes profile configuration or as an environment variable before running the pipeline.
 
 ## Expected Directory Structure
 
 ```
-${REPO_ROOT}/
+{{REPO_ROOT}}/
 ├── CLAUDE.md                  # Project-level instructions (optional)
 ├── techblogger.md             # Writer persona (optional)
 ├── md_to_html.py              # Utility (optional)
 ├── unpublished_stories/       # Medium story articles (sibling pipeline)
-└── short_videos/              # Video content directory (${RP_VIDEO_DIR})
+└── short_videos/              # Video content directory ({{RP_VIDEO_DIR}})
     ├── 01_first-topic/
     │   ├── video-script.md
     │   ├── linkedin-post.md

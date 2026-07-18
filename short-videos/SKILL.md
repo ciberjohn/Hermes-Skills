@@ -16,15 +16,15 @@ Produce a 90-second universal short-video script and standalone LinkedIn post us
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `${REPO_ROOT}` | *(required)* | Path to your Git repository root, e.g. `/home/user/projects/my-content-repo` |
-| `${RP_VIDEO_DIR}` | `${REPO_ROOT}/short_videos` | Directory holding numbered video folders under the repo root |
+| `{{REPO_ROOT}}` | *(required)* | Path to your Git repository root, e.g. `/home/user/projects/my-content-repo` |
+| `{{RP_VIDEO_DIR}}` | `{{REPO_ROOT}}/short_videos` | Directory holding numbered video folders under the repo root |
 
-Before running the pipeline, set `${REPO_ROOT}` to your actual content repository path. All file operations reference this variable — never hardcode absolute paths.
+Before running the pipeline, set `{{REPO_ROOT}}` to your actual content repository path. All file operations reference this variable — never hardcode absolute paths.
 
 ## Prerequisites
 
 - **Hermes Agent** (runtime environment)
-- **Git repo** (your content repository — clone it to `${REPO_ROOT}`)
+- **Git repo** (your content repository — clone it to `{{REPO_ROOT}}`)
 - **GitHub / Git remote** configured for push
 - **HeyGen** (optional) — scripts are HeyGen-ready but work on any teleprompter platform
 - Python 3 for word-count verification
@@ -45,17 +45,17 @@ Before running the pipeline, set `${REPO_ROOT}` to your actual content repositor
 
 ## Repo & Conventions
 
-- **Repo path:** `${REPO_ROOT}`
-- **Video folders:** `${RP_VIDEO_DIR}/NN_slug/` — numbered sequentially, zero-padded to 2 digits (01, 02, 03...)
+- **Repo path:** `{{REPO_ROOT}}`
+- **Video folders:** `{{RP_VIDEO_DIR}}/NN_slug/` — numbered sequentially, zero-padded to 2 digits (01, 02, 03...)
 - **Root files:** `CLAUDE.md` (project instructions), `techblogger.md` (writer persona), `md_to_html.py`
-- **Sibling pipeline:** `medium-story` writes to `unpublished_stories/` — this pipeline writes to `${RP_VIDEO_DIR}/` in the same repo
+- **Sibling pipeline:** `medium-story` writes to `unpublished_stories/` — this pipeline writes to `{{RP_VIDEO_DIR}}/` in the same repo
 
 ## Pipeline Steps
 
 ### Step 1: Sync the repo
 
 ```bash
-terminal(command="git -C ${REPO_ROOT} pull --ff-only origin main", timeout=30)
+terminal(command="git -C {{REPO_ROOT}} pull --ff-only origin main", timeout=30)
 ```
 
 ### Step 2: Read context files and find next video number
@@ -66,7 +66,7 @@ Read these files from the repo root:
 
 Find the next video number:
 ```bash
-terminal(command="ls ${RP_VIDEO_DIR}/ 2>/dev/null | grep -E '^[0-9]+_' | sed 's/_.*//' | sort -n | tail -1")
+terminal(command="ls {{RP_VIDEO_DIR}}/ 2>/dev/null | grep -E '^[0-9]+_' | sed 's/_.*//' | sort -n | tail -1")
 ```
 If the folder doesn't exist yet, start at `01`. Otherwise next = that value + 1, zero-padded to 2 digits.
 
@@ -82,7 +82,7 @@ Spawn a research subagent via `delegate_task`. The research must produce:
 ### Step 4: Create video directory
 
 ```bash
-terminal(command="mkdir -p ${RP_VIDEO_DIR}/NN_slug/")
+terminal(command="mkdir -p {{RP_VIDEO_DIR}}/NN_slug/")
 ```
 
 ### Step 5: Run three parallel agents
@@ -212,7 +212,7 @@ If issues found, list as actionable items. Do not rewrite the files — report o
 ### Step 6: Commit and push
 
 ```bash
-terminal(command="cd ${REPO_ROOT} && git add ${RP_VIDEO_DIR}/NN_slug/ && git commit -m 'Add short video NN: [topic summary]' && git push", timeout=30)
+terminal(command="cd {{REPO_ROOT}} && git add {{RP_VIDEO_DIR}}/NN_slug/ && git commit -m 'Add short video NN: [topic summary]' && git push", timeout=30)
 ```
 
 Always push. Never leave new video content uncommitted.
