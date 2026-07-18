@@ -145,6 +145,8 @@ Copy and paste **one prompt** — your Hermes agent will do the rest:
 
 ## How Skills Work
 
+A full catalog of every skill — including bundled Hermes core skills — is available in **[SKILLS_REFERENCE.md](SKILLS_REFERENCE.md)**.
+
 Skills are an open standard (compatible with [agentskills.io](https://agentskills.io)). Each skill is a folder containing a `SKILL.md` file with metadata and instructions that tell your Hermes agent how to perform a specific task. Skills can also bundle scripts, reference materials, and templates.
 
 Once a skill is in your `~/.hermes/skills/` directory, Hermes discovers it at startup and loads only the name and description — just enough to know when it might be relevant. When you give Hermes a task that matches a skill's description, it loads the full instructions and executes the pipeline.
