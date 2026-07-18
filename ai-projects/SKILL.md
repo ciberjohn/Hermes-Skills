@@ -1,6 +1,7 @@
 ---
 name: ai-projects
 description: Sync a Git repository of AI projects to a local directory.
+version: 1.0.0
 keywords: [git, sync, clone, pull, projects, automation]
 category: devops
 ---

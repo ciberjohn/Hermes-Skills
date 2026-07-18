@@ -1,5 +1,6 @@
 ---
 name: medium-story
+version: 1.0.0
 description: "Full Medium article pipeline using native Hermes tools. Research → write → 4 parallel output agents → HTML conversion → git commit/push."
 tags: [writing, medium, linkedin, youtube, content, publishing, technical, blog]
 platforms: [linux]

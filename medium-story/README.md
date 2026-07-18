@@ -13,7 +13,7 @@ Generate full Medium article packages from a single topic prompt: article in mar
 
 1. Copy `SKILL.md` to your Hermes skills directory:
    ```bash
-   cp medium-story/SKILL.md ~/.hermes/profile/default/skills/creative/medium-story/SKILL.md
+   cp medium-story/SKILL.md ${SKILLS_DIR:-~/.hermes/profiles/default/skills/creative}/medium-story/SKILL.md
    ```
 
 2. Configure the variables at the top of `SKILL.md`:
