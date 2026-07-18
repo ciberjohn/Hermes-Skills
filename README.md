@@ -128,6 +128,7 @@ Once a skill is in your `~/.hermes/skills/` directory, Hermes discovers it at st
 
 | Skill | What it does | Pipeline | Slash command |
 |-------|-------------|----------|---------------|
+| [skill-writer](skill-writer/) | Meta-skill: creates new Hermes Agent skills from a description. Generates SKILL.md, README.md, .gitignore, templates, and runs peer review | 8 steps: intake → research → generate → create supporting → sanitize → review → commit | `/skill-writer [description]` |
 | [medium-story](medium-story/) | Produces a full article package (markdown, video script, LinkedIn post, YouTube script, HTML) from a single topic prompt | 9 steps: sync → cross-ref → research → write → 4 parallel output agents → HTML → git | `/medium-story [topic]` |
 | [short-videos](short-videos/) | Generates 90-second video scripts and standalone LinkedIn posts | 6 steps: sync → research → 3 parallel agents → git | `/short-videos [topic]` |
 | [excalidraw](excalidraw/) | Creates Excalidraw diagrams as JSON files, saved to a GitHub repo | Python helpers → JSON generation → git push | `/excalidraw [description]` |
@@ -147,14 +148,15 @@ The key insight is that the skill system lets you package operational knowledge 
 
 ```
 Hermes-Skills/
-├── medium-story/            # Medium article pipeline
-├── short-videos/            # Short video pipeline
-├── excalidraw/              # Diagram generation
-├── ai-projects/             # Repository sync
-├── templates/               # Shared templates
-│   └── persona-template.md  # Writing voice template
-└── scripts/                 # Shared scripts
-    └── md_to_html.py        # Markdown → HTML converter
+├── skill-writer/             # Meta-skill: creates new skills
+├── medium-story/             # Medium article pipeline
+├── short-videos/             # Short video pipeline
+├── excalidraw/               # Diagram generation
+├── ai-projects/              # Repository sync
+├── templates/                # Shared templates
+│   └── persona-template.md   # Writing voice template
+└── scripts/                  # Shared scripts
+    └── md_to_html.py         # Markdown → HTML converter
 ```
 
 ---

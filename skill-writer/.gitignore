@@ -1,0 +1,29 @@
+# Generated files
+*.html
+*.fragment.html
+*.full.html
+
+# Secrets
+.env
+.env.*
+secrets/
+credentials/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Hermes
+hermes-build/
