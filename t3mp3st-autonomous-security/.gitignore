@@ -1,0 +1,36 @@
+# Generated output
+output/
+
+# T3MP3ST state
+state/
+*.log
+
+# Secrets
+.env
+.env.*
+secrets/
+credentials/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Hermes
+reviews/
+.hermes/

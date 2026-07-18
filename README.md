@@ -75,7 +75,7 @@ If you already know the natural language approach above, stick with it — it as
 
 Copy and paste this to your Hermes agent:
 
-> "Clone github.com/ciberjohn/Hermes-Skills into a local directory. Then copy the SKILL.md from each subdirectory — medium-story, short-videos, excalidraw, ai-projects — into my Hermes skills directory under ~/.hermes/skills/ with their category folders (creative/ for medium-story and short-videos, devops/ for excalidraw and ai-projects). If the directories don't exist, create them. Then, for each skill, ask me the configuration questions it needs — repo paths, URLs, persona file locations. Let me know when everything is installed and show me how to use each one with a slash command example."
+> "Clone github.com/ciberjohn/Hermes-Skills into a local directory. Then copy the SKILL.md from each subdirectory — medium-story, short-videos, excalidraw, ai-projects, t3mp3st-autonomous-security — into my Hermes skills directory under ~/.hermes/skills/ with their category folders (creative/ for medium-story and short-videos, devops/ for excalidraw and ai-projects, security/ for t3mp3st-autonomous-security). If the directories don't exist, create them. Then, for each skill, ask me the configuration questions it needs — repo paths, URLs, persona file locations, and for t3mp3st-autonomous-security also clone T3MP3ST from https://github.com/elder-plinius/T3MP3ST.git, run npm install, configure the .env with my API key, and run npm run doctor to verify. Let me know when everything is installed and show me how to use each one with a slash command example."
 
 ---
 
@@ -129,6 +129,20 @@ Copy and paste:
 
 ---
 
+### Install t3mp3st-autonomous-security (with T3MP3ST)
+
+Copy and paste **one prompt** — your Hermes agent will do the rest:
+
+> "Install the t3mp3st-autonomous-security skill from github.com/ciberjohn/Hermes-Skills into ~/.hermes/skills/security/t3mp3st-autonomous-security/SKILL.md. First, clone T3MP3ST from https://github.com/elder-plinius/T3MP3ST.git into a directory I specify, run npm install in it, and verify it installed correctly. Then ask me these questions one at a time:
+> 1. Where should T3MP3ST be installed? `{{T3MP3ST_PATH}}` (default ~/t3mp3st)
+> 2. What is my OpenRouter API key? `{{OPENROUTER_API_KEY}}` (get one at https://openrouter.ai/keys if you don't have one)
+> 3. What port should the MCP server use? `{{T3MP3ST_PORT}}` (default 3333)
+> 4. What comma-separated targets should be in my daily recon scope? `{{SCOPE_TARGETS}}` (default: 127.0.0.1)
+> 5. What hosts should the fleet assessment scan? `{{FLEET_HOSTS}}` (space-separated hostnames or IPs, optional)
+> When I answer each, create the `.env` file with all the env vars from SKILL.md section 2 — `OPENROUTER_API_KEY`, `T3MP3ST_FULL_ARSENAL`, `T3MP3ST_STATE_DIR`, `T3MP3ST_PORT`, and `SCOPE_TARGETS` — set permissions to `chmod 600`, run `npm run doctor` to confirm everything is working, show me the doctor output, then tell me the skill is ready and show me an example: '/t3mp3st-autonomous-security run a quick recon against my local targets'."
+
+---
+
 ## How Skills Work
 
 Skills are an open standard (compatible with [agentskills.io](https://agentskills.io)). Each skill is a folder containing a `SKILL.md` file with metadata and instructions that tell your Hermes agent how to perform a specific task. Skills can also bundle scripts, reference materials, and templates.
@@ -146,6 +160,7 @@ Once a skill is in your `~/.hermes/skills/` directory, Hermes discovers it at st
 | [short-videos](short-videos/) | Generates 90-second video scripts and standalone LinkedIn posts | 6 steps: sync → research → 3 parallel agents → git | `/short-videos [topic]` |
 | [excalidraw](excalidraw/) | Creates Excalidraw diagrams as JSON files, saved to a GitHub repo | Python helpers → JSON generation → git push | `/excalidraw [description]` |
 | [ai-projects](ai-projects/) | Syncs a Git repository of AI projects to a local directory | Clone → pull → status report | `/ai-projects [action]` |
+| [t3mp3st-autonomous-security](t3mp3st-autonomous-security/) | Autonomous security ops — installs T3MP3ST for recon, scanning, CVE hunting, and kill-chain ops with an LLM-driven AI agent | Setup → verify → configure scope → autonomous hunting → fleet assessment | `/t3mp3st-autonomous-security [target]` |
 
 ---
 
@@ -166,6 +181,7 @@ Hermes-Skills/
 ├── short-videos/             # Short video pipeline
 ├── excalidraw/               # Diagram generation
 ├── ai-projects/              # Repository sync
+├── t3mp3st-autonomous-security/ # Autonomous security ops
 ├── templates/                # Shared templates
 │   └── persona-template.md   # Writing voice template
 └── scripts/                  # Shared scripts
