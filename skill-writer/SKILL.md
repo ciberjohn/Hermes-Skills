@@ -54,6 +54,14 @@ If the skill involves a technical topic, spawn a research sub-agent to gather:
 
 If the skill is straightforward (e.g. a simple git sync), skip this step.
 
+Also check `agentskills.io/skill-creation/best-practices.md` for general skill authoring guidelines:
+- "Calibrate control" — match specificity to fragility: prescriptive for fragile ops, flexible for creative tasks
+- "Provide defaults, not menus" — pick one default tool/approach, mention alternatives briefly
+- "Favor procedures over declarations" — teach *how*, not *what*
+- "Use Gotchas sections" — environment-specific corrections to mistakes the agent makes
+- "Templates for output format" — concrete patterns > prose descriptions
+- "Bundle reusable scripts" — when agents reinvent the same logic, bundle it
+
 ### Step Three — Generate SKILL.md
 
 Create `{HERMES_SKILLS_REPO_PATH}/{skill-name}/SKILL.md` with the following structure:
@@ -86,6 +94,9 @@ Rules:
 - Use `/home/user/` as example paths in documentation
 - Every variable in the Config Variables table must be referenced in the pipeline steps
 - Include `version: 1.0.0` in the YAML frontmatter
+- Compatible with the [agentskills.io](https://agentskills.io/specification.md) open standard — include `name` and `description` at minimum
+- Consider adding `license`, `compatibility`, and `metadata` fields where relevant
+- Consider generating eval/test cases for the skill (see `agentskills.io/skill-creation/evaluating-skills.md`)
 
 ### Step Four — Generate README.md
 
@@ -131,6 +142,18 @@ Role the sub-agent as "Senior Developer reviewing a new Hermes skill." Ask it to
 6. Would a new user be able to install and use this skill from the README alone?
 
 Collect the review output as a structured report. Fix any issues found.
+
+### Step Seven.b — Validate (Optional)
+
+If the `skills-ref` validation tool is available, run:
+
+```bash
+skills-ref validate ./{skill-name}
+```
+
+This checks the SKILL.md against the [agentskills.io](https://agentskills.io/specification.md) specification. Fix any validation errors.
+
+If `skills-ref` is not installed, skip this step.
 
 ### Step Eight — Git Commit
 
