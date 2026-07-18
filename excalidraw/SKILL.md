@@ -1,9 +1,11 @@
 ---
 name: excalidraw
 description: "Create Excalidraw diagrams using native Hermes tools. Generates valid .excalidraw JSON, saves to a GitHub repo, and provides the sharing instance URL for viewing/editing. Replaces MCP-based diagram tools — no external dependency."
-version: 1.1.0
-tags: [diagrams, excalidraw, visual, architecture, design]
-platforms: [linux]
+license: MIT
+metadata:
+  version: "1.1.0"
+  tags: [diagrams, excalidraw, visual, architecture, design]
+  platforms: [linux]
 ---
 
 # Excalidraw — Hermes-Native Diagram Pipeline

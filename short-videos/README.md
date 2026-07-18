@@ -37,13 +37,13 @@ export REPO_ROOT=/path/to/your-repo
 Copy the contents of this directory into your Hermes Agent skills directory:
 
 ```bash
-cp -r short-videos/ ${HOME}/.hermes/profiles/spock/skills/creative/
+cp -r short-videos/ ${HOME}/.hermes/profiles/default/skills/creative/
 ```
 
 Or symlink for live development:
 
 ```bash
-ln -s /path/to/Hermes-Skills/short-videos ${HOME}/.hermes/profiles/spock/skills/creative/short-videos
+ln -s /path/to/Hermes-Skills/short-videos ${HOME}/.hermes/profiles/default/skills/creative/short-videos
 ```
 
 ### 3. Enable the skill in Hermes

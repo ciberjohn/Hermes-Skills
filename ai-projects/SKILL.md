@@ -1,9 +1,11 @@
 ---
 name: ai-projects
 description: Sync a Git repository of AI projects to a local directory.
-version: 1.0.0
-keywords: [git, sync, clone, pull, projects, automation]
-category: devops
+license: MIT
+metadata:
+  version: "1.0.0"
+  tags: [git, sync, clone, pull, projects, automation]
+  category: devops
 ---
 
 # ai-projects
@@ -18,7 +20,7 @@ working tree.
 | Variable | Purpose | Example |
 |---|---|---|
 | `{{AI_PROJECTS_REPO_URL}}` | The full Git remote URL to clone from | `https://github.com/example/ai-projects.git` |
-| `{{AI_PROJECTS_LOCAL_PATH}}` | Absolute path to the local copy | `/home/user/ai-projects` |
+| `{{AI_PROJECTS_LOCAL_PATH}}` | Absolute path to the local copy | `~/ai-projects` |
 
 Set these in your Hermes profile configuration under the `ai-projects` skill
 block, or export them as environment variables before invoking the skill.

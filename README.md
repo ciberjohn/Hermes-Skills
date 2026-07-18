@@ -16,6 +16,19 @@ Once installed, the skill is available as a slash command (`/medium-story`, `/sh
 
 ---
 
+### Install skill-writer
+
+Copy and paste:
+
+> "Install the skill-writer meta-skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills and copy skill-writer/SKILL.md into ~/.hermes/skills/meta/skill-writer/SKILL.md. Also copy skill-writer/.gitignore into the same directory. Then ask me:
+> 1. Where is my Hermes-Skills repository on disk?
+> 2. What is the GitHub URL for the Hermes-Skills repo?
+> 3. What name should I use for attribution in new skills?
+> 4. Should peer review be enabled for new skills?
+> Store my answers, then show me an example: '/skill-writer I need a skill that monitors disk usage and posts alerts to Discord when volumes exceed 90%.'."
+
+---
+
 ### Alternative: Install via Skills Hub CLI (Advanced)
 
 Hermes also has a built-in Skills Hub with CLI commands for power users:

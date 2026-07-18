@@ -1,10 +1,12 @@
 ---
 name: medium-story
-version: 1.0.0
 description: "Full Medium article pipeline using native Hermes tools. Research → write → 4 parallel output agents → HTML conversion → git commit/push."
-tags: [writing, medium, linkedin, youtube, content, publishing, technical, blog]
-platforms: [linux]
-related_skills: [short-videos, technical-writing]
+license: MIT
+metadata:
+  version: "1.0.0"
+  tags: [writing, medium, linkedin, youtube, content, publishing, technical, blog]
+  platforms: [linux]
+  related_skills: [short-videos, technical-writing]
 ---
 
 # Medium Story — Hermes-Native Article Pipeline
@@ -28,15 +30,15 @@ Set these in your environment before running the pipeline, or document them in a
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `{{MEDIUM_REPO_PATH}}` | Absolute path to your local Medium articles Git repository | `/home/user/Medium-Articles` |
+| `{{MEDIUM_REPO_PATH}}` | Absolute path to your local Medium articles Git repository | `~/Medium-Articles` |
 | `{{GITHUB_REPO_URL}}` | HTTPS clone URL of your Medium articles repo | `https://github.com/your-username/Medium-Articles.git` |
 | `{{MEDIUM_RSS_FEED_URL}}` | RSS feed URL for your Medium publication | `https://your-username.medium.com/feed` |
 | `{{MEDIUM_USERNAME}}` | Your Medium publication username | `your-username` |
 | `{{STORY_NUMBER}}` | Auto-incremented sequential story number (set by pipeline) | `42` |
 | `{{STORY_SLUG}}` | URL-friendly slug derived from the article title | `why-your-mfa-does-not-help` |
 | `{{GH_TOKEN}}` | (Optional) GitHub personal access token for API rate-limit bypass | `ghp_xxxxxxxxxxxxxxxxxxxx` |
-| `{{REPO_ROOT}}` | Root of the Hermes-Skills repository (for skill development) | `/home/user/Hermes-Skills` |
-| `{{SKILLS_DIR}}` | Path to the Hermes skills directory | `/home/user/.hermes/profiles/default/skills` |
+| `{{REPO_ROOT}}` | Root of the Hermes-Skills repository (for skill development) | `~/Hermes-Skills` |
+| `{{SKILLS_DIR}}` | Path to the Hermes skills directory | `~/.hermes/profiles/default/skills` |
 | `{{PUBLISHED_AUTHOR}}` | Your byline as it should appear on articles | `Your Name` |
 | `{{PERSONA_FILE}}` | Path to your persona prompt file | `templates/persona-template.md` |
 | `{{CACHE_PATH}}` | Path to the medium feed cache XML | `{{MEDIUM_REPO_PATH}}/medium_feed_cache.xml` |

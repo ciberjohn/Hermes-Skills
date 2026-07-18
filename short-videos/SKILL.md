@@ -1,11 +1,12 @@
 ---
 name: short-videos
 description: "Produce 90-second universal short-video scripts (HeyGen / Instagram Reels / LinkedIn Video / YouTube Shorts) and standalone LinkedIn posts using native Hermes tools. No Claude Code dependency."
-version: 1.2.0
-author: Hermes Agent Skill Template
-tags: [video, linkedin, social-media, content, short-form, heygen]
-platforms: [linux]
-related_skills: [medium-story, technical-writing]
+license: MIT
+metadata:
+  version: "1.2.0"
+  tags: [video, linkedin, social-media, content, short-form, heygen]
+  platforms: [linux]
+  related_skills: [medium-story, technical-writing]
 ---
 
 # Short Videos — Hermes-Native Video Script Pipeline
@@ -16,7 +17,7 @@ Produce a 90-second universal short-video script and standalone LinkedIn post us
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `{{REPO_ROOT}}` | *(required)* | Path to your Git repository root, e.g. `/home/user/projects/my-content-repo` |
+| `{{REPO_ROOT}}` | *(required)* | Path to your Git repository root, e.g. `~/projects/my-content-repo` |
 | `{{RP_VIDEO_DIR}}` | `{{REPO_ROOT}}/short_videos` | Directory holding numbered video folders under the repo root |
 
 Before running the pipeline, set `{{REPO_ROOT}}` to your actual content repository path. All file operations reference this variable — never hardcode absolute paths.

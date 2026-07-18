@@ -31,3 +31,5 @@ Thumbs.db
 # Hermes
 hermes-build/
 __pycache__/
+.hermes/
+reviews/

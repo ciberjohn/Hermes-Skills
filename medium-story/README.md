@@ -50,11 +50,14 @@ Edit the top of `SKILL.md` to set:
 
 | Variable | Purpose | Example |
 |----------|---------|---------|
-| `MEDIUM_REPO_PATH` | Absolute path to your Medium repo | `/home/user/Medium-Articles` |
-| `MEDIUM_REPO_URL` | Git remote URL | `github.com/user/Medium-Articles.git` |
-| `PERSONA_FILE` | Path to your writing persona | `/home/user/persona.md` |
-| `MD_TO_HTML_SCRIPT` | Path to the HTML converter | `{MEDIUM_REPO_PATH}/md_to_html.py` |
-| `STORY_NUMBER` | Set automatically by the skill | — |
+| `{{MEDIUM_REPO_PATH}}` | Absolute path to your Medium repo | `~/Medium-Articles` |
+| `{{GITHUB_REPO_URL}}` | Git remote URL | `github.com/user/Medium-Articles.git` |
+| `{{MEDIUM_RSS_FEED_URL}}` | RSS feed URL for your Medium publication | `https://your-username.medium.com/feed` |
+| `{{MEDIUM_USERNAME}}` | Your Medium publication username | `your-username` |
+| `{{PERSONA_FILE}}` | Path to your persona prompt file | `templates/persona-template.md` |
+| `{{MD_TO_HTML_SCRIPT}}` | Path to the HTML converter | `{MEDIUM_REPO_PATH}/md_to_html.py` |
+| `{{PUBLISHED_AUTHOR}}` | Your byline as it should appear on articles | `Your Name` |
+| `{{STORY_NUMBER}}` | Auto-incremented sequential story number (set by pipeline) | — |
 
 ## How It Works
 

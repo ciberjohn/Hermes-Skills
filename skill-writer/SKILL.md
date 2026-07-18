@@ -1,9 +1,11 @@
 ---
 name: skill-writer
-version: 1.0.0
 description: "Creates new Hermes Agent skills from a description. Given a topic and concept, generates SKILL.md, README.md, .gitignore, and supporting files — sanitised, peer-reviewed, and ready for the Hermes-Skills repo."
-tags: [meta, skill-creation, development, automation, publishing]
-platforms: [linux, darwin]
+license: MIT
+metadata:
+  version: "1.0.0"
+  tags: [meta, skill-creation, development, automation, publishing]
+  platforms: [linux, darwin]
 ---
 
 # Skill-Writer
