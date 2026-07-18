@@ -6,64 +6,96 @@ A growing collection of reusable Hermes Agent skills, built to be installed, ext
 
 ---
 
-## How Installation Works (No Manual Steps)
+## How Installation Works
 
 Every skill in this repo is designed to be installed the way you would tell a colleague what to do: in natural language.
 
-Copy one of the prompts below, paste it to your Hermes agent, and it handles the rest — cloning the repo, placing the files, and asking you the configuration questions it needs.
+Copy one of the prompts below, paste it to your Hermes agent, and it handles the rest — cloning the repo, placing the files in `~/.hermes/skills/`, and asking you the configuration questions it needs.
+
+Once installed, the skill is available as a slash command (`/medium-story`, `/short-videos`, `/excalidraw`, `/ai-projects`) — or you can invoke it naturally by describing what you want.
+
+---
 
 ### Quick Install — All Skills
 
-> "Install the Hermes Skills collection from github.com/ciberjohn/Hermes-Skills. Clone it to a local directory, then copy each skill's SKILL.md into my Hermes profiles under the appropriate category folder. For each skill, ask me to configure the path variables it needs."
+Copy and paste this to your Hermes agent:
 
-### Install a Single Skill — `medium-story`
-
-> "Install the medium-story skill from github.com/ciberjohn/Hermes-Skills. Copy the SKILL.md into my Hermes skills directory under creative/medium-story/. Then ask me where my Medium articles repo lives, where my persona file is, and what GitHub URL it should push to."
-
-### Install a Single Skill — `short-videos`
-
-> "Install the short-videos skill from github.com/ciberjohn/Hermes-Skills. Copy the SKILL.md into my Hermes skills directory under creative/short-videos/. Then ask me where my content repository is and where video folders should be created."
-
-### Install a Single Skill — `excalidraw`
-
-> "Install the excalidraw Hermes skill from github.com/ciberjohn/Hermes-Skills. Copy the SKILL.md into my Hermes skills directory, and copy python_helpers.py to a location I specify. Ask me where my excalidraw diagrams repo is and where to clone it."
-
-### Install a Single Skill — `ai-projects`
-
-> "Install the ai-projects Hermes skill from github.com/ciberjohn/Hermes-Skills. Copy the SKILL.md into my Hermes skills directory. Ask me for the GitHub URL of my AI projects repo and where to clone it locally."
+> "Clone github.com/ciberjohn/Hermes-Skills into a local directory. Then copy the SKILL.md from each subdirectory — medium-story, short-videos, excalidraw, ai-projects — into my Hermes skills directory under ~/.hermes/skills/ with their category folders (creative/ for medium-story and short-videos, devops/ for excalidraw and ai-projects). If the directories don't exist, create them. Then, for each skill, ask me the configuration questions it needs — repo paths, URLs, persona file locations. Let me know when everything is installed and show me how to use each one with a slash command example."
 
 ---
 
-## How It Works
+### Install medium-story
 
-Each skill defines a **pipeline**: a sequence of steps that your Hermes agent executes when you give it a goal. The steps use Hermes-native tools — `delegate_task` to spawn sub-agents, `write_file` to save output, `terminal` to run git commands — without external process managers, tmux sessions, or MCP servers.
+Copy and paste:
 
-When you tell your agent what you want, it loads the skill, reads the configuration, and runs the pipeline. You do not manage sessions, approve permissions, or restart stalled processes.
+> "Install the medium-story skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills to a temporary directory and copy medium-story/SKILL.md into ~/.hermes/skills/creative/medium-story/SKILL.md. If creative/ doesn't exist, create it. Then copy the contents of medium-story/references/ into ~/.hermes/skills/creative/medium-story/references/. After that, ask me these configuration questions one at a time:
+> 1. Where is my Medium articles repository on disk? (absolute path)
+> 2. What is the GitHub remote URL for that repository?
+> 3. Where is my writing persona file?
+> 4. Where is my md_to_html.py script located?
+> 5. What Medium RSS feed URL should I cache (optional)?
+> 6. What byline name should articles use?
+> When I answer each, store the values so the skill works next time I use it. Finally, show me an example of how to invoke it: '/medium-story write an article about why SSH key management still fails in 2026'."
+
+---
+
+### Install short-videos
+
+Copy and paste:
+
+> "Install the short-videos skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills and copy short-videos/SKILL.md into ~/.hermes/skills/creative/short-videos/SKILL.md. Then ask me:
+> 1. Where is my content repository on disk?
+> 2. Where should short video folders be created inside that repo?
+> Store my answers, then show me an example: '/short-videos create a video about zero-trust networking for remote Kubernetes clusters'."
+
+---
+
+### Install excalidraw
+
+Copy and paste:
+
+> "Install the excalidraw skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills and copy excalidraw/SKILL.md into ~/.hermes/skills/devops/excalidraw/SKILL.md. Also copy excalidraw/python_helpers.py into a location I specify. Then ask me:
+> 1. Where is my excalidraw diagrams repository on disk?
+> 2. What is the GitHub URL for that repository?
+> 3. Where should I put python_helpers.py?
+> 4. What is the URL of my self-hosted Excalidraw instance (optional)?
+> Store my answers, then show me an example: '/excalidraw generate a pipeline architecture diagram for the CI/CD flow'."
+
+---
+
+### Install ai-projects
+
+Copy and paste:
+
+> "Install the ai-projects skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills and copy ai-projects/SKILL.md into ~/.hermes/skills/devops/ai-projects/SKILL.md. Then ask me:
+> 1. What is the GitHub URL of my AI projects repository?
+> 2. Where should I clone it on disk?
+> Store my answers, then show me an example: '/ai-projects sync the latest projects'."
+
+---
+
+## How Skills Work
+
+Skills are an open standard (compatible with [agentskills.io](https://agentskills.io)). Each skill is a folder containing a `SKILL.md` file with metadata and instructions that tell your Hermes agent how to perform a specific task. Skills can also bundle scripts, reference materials, and templates.
+
+Once a skill is in your `~/.hermes/skills/` directory, Hermes discovers it at startup and loads only the name and description — just enough to know when it might be relevant. When you give Hermes a task that matches a skill's description, it loads the full instructions and executes the pipeline.
+
+**You never manage sessions, approve permission prompts, or restart stalled processes.** The agent handles everything.
 
 ### Current Skills
 
-| Skill | What it does | Pipeline |
-|-------|-------------|----------|
-| [medium-story](medium-story/) | Produces a full article package (markdown, video script, LinkedIn post, YouTube script, HTML) from a single topic prompt | 9 steps: sync → cross-ref → research → write → 4 parallel output agents → HTML → git |
-| [short-videos](short-videos/) | Generates 90-second video scripts and standalone LinkedIn posts | 6 steps: sync → research → 3 parallel agents → git |
-| [excalidraw](excalidraw/) | Creates Excalidraw diagrams as JSON files, saved to a GitHub repo | Python helpers → JSON generation → git push |
-| [ai-projects](ai-projects/) | Syncs a Git repository of AI projects to a local directory | Clone → pull → status report |
-
----
-
-## Prerequisites
-
-- **Hermes Agent** — [Install from Nous Research](https://hermes-agent.nousresearch.com)
-- **Git** — for version control and automated git operations
-- **Python 3** — for supporting scripts (HTML conversion, diagram helpers)
-
-Each skill's README lists its specific requirements.
+| Skill | What it does | Pipeline | Slash command |
+|-------|-------------|----------|---------------|
+| [medium-story](medium-story/) | Produces a full article package (markdown, video script, LinkedIn post, YouTube script, HTML) from a single topic prompt | 9 steps: sync → cross-ref → research → write → 4 parallel output agents → HTML → git | `/medium-story [topic]` |
+| [short-videos](short-videos/) | Generates 90-second video scripts and standalone LinkedIn posts | 6 steps: sync → research → 3 parallel agents → git | `/short-videos [topic]` |
+| [excalidraw](excalidraw/) | Creates Excalidraw diagrams as JSON files, saved to a GitHub repo | Python helpers → JSON generation → git push | `/excalidraw [description]` |
+| [ai-projects](ai-projects/) | Syncs a Git repository of AI projects to a local directory | Clone → pull → status report | `/ai-projects [action]` |
 
 ---
 
 ## The Pattern
 
-These skills follow the same architecture that runs my own fleet: a single main agent (Spock) that delegates work to specialised sub-agents, communicates through Discord webhooks, and runs on a schedule through Hermes cron. You do not need that exact setup to use the skills. They work with any Hermes profile.
+These skills follow the same architecture that runs my own fleet: a main agent that delegates work to specialised sub-agents, communicates through messaging gateways, and runs on a schedule through Hermes cron. You do not need that exact setup to use the skills. They work with any Hermes profile.
 
 The key insight is that the skill system lets you package operational knowledge as something an agent can load and follow, the same way a human engineer reads a runbook. The more skills you build, the more your agent understands about your infrastructure, your workflows, and your preferences — all expressed in natural language, all stored as plain markdown files.
 
