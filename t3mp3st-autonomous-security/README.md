@@ -17,8 +17,9 @@ Autonomous security operations framework for Hermes Agent. Installs, configures,
 ## Prerequisites
 
 - **Node.js v22+** and **npm**
-- **OpenRouter API key** (get one at https://openrouter.ai/keys)
 - **Security tools:** `nmap`, `hydra`, `nikto`, `sqlmap`, `whois`, `jq`, `curl`, `wget`, `dig`
+
+**Optional:** OpenRouter API key (https://openrouter.ai/keys) — only if you want T3MP3ST to run fully autonomously. Without it, Hermes drives operations using your existing model.
 
 ## Installation
 
@@ -26,11 +27,11 @@ Copy and paste **one prompt** — your Hermes agent will do the rest:
 
 > "Install the t3mp3st-autonomous-security skill from github.com/ciberjohn/Hermes-Skills into ~/.hermes/skills/security/t3mp3st-autonomous-security/SKILL.md. First, clone T3MP3ST from https://github.com/elder-plinius/T3MP3ST.git into a directory I specify, run npm install in it, and verify it installed correctly. Then ask me these questions one at a time:
 > 1. Where should T3MP3ST be installed? `{{T3MP3ST_PATH}}` (default ~/t3mp3st)
-> 2. What is my OpenRouter API key? `{{OPENROUTER_API_KEY}}` (get one at https://openrouter.ai/keys if you don't have one)
-> 3. What port should the MCP server use? `{{T3MP3ST_PORT}}` (default 3333)
-> 4. What comma-separated targets should be in my daily recon scope? `{{SCOPE_TARGETS}}` (default: 127.0.0.1)
-> 5. What hosts should the fleet assessment scan? `{{FLEET_HOSTS}}` (space-separated hostnames or IPs, optional)
-> When I answer each, create the `.env` file with all the env vars from SKILL.md section 2 — `OPENROUTER_API_KEY`, `T3MP3ST_FULL_ARSENAL`, `T3MP3ST_STATE_DIR`, `T3MP3ST_PORT`, and `SCOPE_TARGETS` — set permissions to `chmod 600`, run `npm run doctor` to confirm everything is working, show me the doctor output, then tell me the skill is ready and show me an example: '/t3mp3st-autonomous-security run a quick recon against my local targets'."
+> 2. What port should the MCP server use? `{{T3MP3ST_PORT}}` (default 3333)
+> 3. What comma-separated targets should be in my daily recon scope? `{{SCOPE_TARGETS}}` (default: 127.0.0.1)
+> 4. What hosts should the fleet assessment scan? `{{FLEET_HOSTS}}` (space-separated hostnames or IPs, optional)
+> 5. Do you have an OpenRouter API key for T3MP3ST's internal AI? `{{OPENROUTER_API_KEY}}` (optional — leave blank to use Hermes's existing model instead)
+> When I answer each, create the `.env` file with all the env vars — write the API key if provided, leave it empty otherwise — set permissions to `chmod 600`, run `npm run doctor` to confirm everything is working, show me the doctor output, then tell me the skill is ready and show me an example: '/t3mp3st-autonomous-security run a quick recon against my local targets'."
 
 ### Alternative: Manual Setup
 
@@ -40,9 +41,9 @@ git clone https://github.com/elder-plinius/T3MP3ST.git ~/t3mp3st
 cd ~/t3mp3st
 npm install
 
-# 2. Configure .env
+# 2. Configure .env (API key is optional — leave empty to use Hermes instead)
 cat > ~/t3mp3st/.env << 'EOF'
-OPENROUTER_API_KEY=sk-or-...
+OPENROUTER_API_KEY=             # optional — leave blank for Hermes-driven ops
 T3MP3ST_FULL_ARSENAL=false
 T3MP3ST_STATE_DIR=~/t3mp3st/state
 T3MP3ST_PORT=3333
@@ -59,7 +60,7 @@ npm run doctor
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `{{T3MP3ST_PATH}}` | Yes | `~/t3mp3st` | Absolute path where T3MP3ST is installed |
-| `{{OPENROUTER_API_KEY}}` | Yes | — | OpenRouter API key for LLM-driven operations |
+| `{{OPENROUTER_API_KEY}}` | No | (none) | Only needed for T3MP3ST's internal AI. Without it, Hermes drives operations using your existing model. |
 | `{{T3MP3ST_PORT}}` | No | `3333` | Port for MCP server and War Room UI |
 | `{{SCOPE_TARGETS}}` | No | `127.0.0.1` | Comma-separated authorised targets for egress-scope containment |
 | `{{FLEET_HOSTS}}` | No | (optional) | Space-separated hostnames or IPs for fleet assessment |

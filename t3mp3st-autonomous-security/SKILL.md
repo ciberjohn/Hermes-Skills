@@ -46,7 +46,7 @@ When the user invokes this skill, follow these steps in order:
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `{{T3MP3ST_PATH}}` | Yes | `~/t3mp3st` | Absolute path where T3MP3ST is installed |
-| `{{OPENROUTER_API_KEY}}` | Yes | — | OpenRouter API key for LLM-driven operations |
+| `{{OPENROUTER_API_KEY}}` | No | (none) | Only needed for T3MP3ST's internal autonomous AI features. If you use Hermes to drive operations, your existing Hermes model is sufficient and this can be left unset. |
 | `{{T3MP3ST_PORT}}` | No | `3333` | Port for MCP server and War Room UI |
 | `{{SCOPE_TARGETS}}` | No | `127.0.0.1` | Comma-separated authorised targets — written to `.env` for T3MP3ST's egress-scope containment |
 | `{{FLEET_HOSTS}}` | No | (optional) | Space-separated hostnames or IPs for fleet assessment (NOT JSON — bash array format) |
@@ -56,12 +56,14 @@ When the user invokes this skill, follow these steps in order:
 
 ### System Requirements
 - **Node.js v22+** and **npm**
-- **OpenRouter API key** — get one at https://openrouter.ai/keys
 - **External security tools:** `nmap`, `hydra`, `nikto`, `sqlmap`, `whois`, `jq`, `curl`, `wget`, `dig`
 
   - Debian/Ubuntu: `sudo apt install nmap hydra nikto sqlmap whois jq curl wget dnsutils`
   - macOS: `brew install nmap hydra nikto sqlmap whois jq curl wget bind`
   - Fedora/RHEL: `sudo dnf install nmap hydra nikto sqlmap whois jq curl wget bind-utils`
+
+### Optional: OpenRouter API Key
+T3MP3ST has its own internal LLM-driven autonomous decision-making which requires an OpenRouter API key at https://openrouter.ai/keys. **This is optional.** If you leave it unset, the Hermes agent drives operations directly using your existing model — it runs the tools, interprets results, and executes the kill chain phases itself. You only need the key if you want T3MP3ST to act fully autonomously without Hermes mediation.
 
 ### Optional Extras
 - `nuclei` — high-value vulnerability scanner
@@ -91,7 +93,7 @@ EOF
 chmod 600 {{T3MP3ST_PATH}}/.env
 ```
 
-> **Security:** The `.env` file contains your API key — `chmod 600` restricts it to file owner only. Never commit this file to version control.
+> **Security:** The `.env` file may contain an API key — `chmod 600` restricts it to file owner only. Never commit this file to version control. If you didn't set an API key, the auth line remains empty and T3MP3ST operates without its internal AI — Hermes drives the operations instead.
 
 > **Note on `T3MP3ST_FULL_ARSENAL`:** This defaults to `false`, which enables a safe subset of tools (recon, scanning). Set to `true` to enable all 80+ tools including hydra, sqlmap, and credential-based tooling — but only if you understand the risks and have explicit authorisation for every target.
 
@@ -323,7 +325,7 @@ output/
 | `npm run doctor` fails — missing tool | Tool not installed | `sudo apt install <pkg>` (Linux) or `brew install <pkg>` (macOS) |
 | `SCOPE DENIED` errors | Target not in authorized scope | Verify target authorisation; check `SCOPE_TARGETS` in `.env` |
 | MCP server won't start | Port `{{T3MP3ST_PORT}}` already in use | `ss -tlnp \| grep {{T3MP3ST_PORT}}` or `fuser {{T3MP3ST_PORT}}/tcp` to find the process |
-| `OPENROUTER_API_KEY` not found | `.env` not configured | Check `{{T3MP3ST_PATH}}/.env` exists with valid key and permissions (`chmod 600`) |
+| `OPENROUTER_API_KEY` not found or empty | No API key configured (optional) | Leave it empty — Hermes drives operations directly. Only set it if you want T3MP3ST to act fully autonomously. |
 | Hermes `terminal()` returns empty results | `$HOME` override in profile isolation | Prefix commands with `HOME=/home/<your-username>` (the real user home, not the profile's isolated home). Verify with `echo $HOME` |
 | Orphaned MCP server processes | Background server never stopped | `pkill -f 'npm run mcp'` or `kill $(fuser {{T3MP3ST_PORT}}/tcp 2>/dev/null)` |
 

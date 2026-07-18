@@ -135,11 +135,11 @@ Copy and paste **one prompt** — your Hermes agent will do the rest:
 
 > "Install the t3mp3st-autonomous-security skill from github.com/ciberjohn/Hermes-Skills into ~/.hermes/skills/security/t3mp3st-autonomous-security/SKILL.md. First, clone T3MP3ST from https://github.com/elder-plinius/T3MP3ST.git into a directory I specify, run npm install in it, and verify it installed correctly. Then ask me these questions one at a time:
 > 1. Where should T3MP3ST be installed? `{{T3MP3ST_PATH}}` (default ~/t3mp3st)
-> 2. What is my OpenRouter API key? `{{OPENROUTER_API_KEY}}` (get one at https://openrouter.ai/keys if you don't have one)
-> 3. What port should the MCP server use? `{{T3MP3ST_PORT}}` (default 3333)
-> 4. What comma-separated targets should be in my daily recon scope? `{{SCOPE_TARGETS}}` (default: 127.0.0.1)
-> 5. What hosts should the fleet assessment scan? `{{FLEET_HOSTS}}` (space-separated hostnames or IPs, optional)
-> When I answer each, create the `.env` file with all the env vars from SKILL.md section 2 — `OPENROUTER_API_KEY`, `T3MP3ST_FULL_ARSENAL`, `T3MP3ST_STATE_DIR`, `T3MP3ST_PORT`, and `SCOPE_TARGETS` — set permissions to `chmod 600`, run `npm run doctor` to confirm everything is working, show me the doctor output, then tell me the skill is ready and show me an example: '/t3mp3st-autonomous-security run a quick recon against my local targets'."
+> 2. What port should the MCP server use? `{{T3MP3ST_PORT}}` (default 3333)
+> 3. What comma-separated targets should be in my daily recon scope? `{{SCOPE_TARGETS}}` (default: 127.0.0.1)
+> 4. What hosts should the fleet assessment scan? `{{FLEET_HOSTS}}` (space-separated hostnames or IPs, optional)
+> 5. Do you have an OpenRouter API key for T3MP3ST's internal AI? `{{OPENROUTER_API_KEY}}` (optional — leave blank to use Hermes's existing model instead)
+> When I answer each, create the `.env` file with all the env vars — write the API key if provided, leave it empty otherwise — set permissions to `chmod 600`, run `npm run doctor` to confirm everything is working, show me the doctor output, then tell me the skill is ready and show me an example: '/t3mp3st-autonomous-security run a quick recon against my local targets'."
 
 ---
 
