@@ -1,7 +1,7 @@
 ---
 name: skill-writer
 version: 1.0.0
-description: "Creates new Hermes Agent skills from a description. Given a topic and concept, generates SKILL.md, README.md, .gitignore, and supporting files — sanitized, peer-reviewed, and ready for the Hermes-Skills repo."
+description: "Creates new Hermes Agent skills from a description. Given a topic and concept, generates SKILL.md, README.md, .gitignore, and supporting files — sanitised, peer-reviewed, and ready for the Hermes-Skills repo."
 tags: [meta, skill-creation, development, automation, publishing]
 platforms: [linux, darwin]
 ---
@@ -16,9 +16,8 @@ Creates new Hermes Agent skills. Given a description of what a skill should do, 
 |----------|----------|---------|-------------|
 | `HERMES_SKILLS_REPO_PATH` | Yes | — | Absolute path to the Hermes-Skills repository on disk |
 | `HERMES_SKILLS_REPO_URL` | Yes | — | Git remote URL for the Hermes-Skills repo |
-| `SKILL_AUTHOR_NAME` | No | `João Silva` | Your name for attribution in new skills |
-| `SKILL_AUTHOR_URL` | No | `https://github.com/ciberjohn` | Your URL for attribution |
-| `SKILL_LICENSE` | No | `MIT` | License for new skills |
+| `SKILL_AUTHOR_NAME` | No | `Your Name` | Your name for attribution in new skills |
+| `SKILL_AUTHOR_URL` | No | `https://github.com/your-username` | Your URL for attribution |
 | `PEER_REVIEW_ENABLED` | No | `true` | Whether to run peer review sub-agent on output |
 
 ## Prerequisites
@@ -91,7 +90,7 @@ Rules:
 - Use `{{VARIABLE_NAME}}` syntax for all configurable paths and values (not `${}`)
 - Use British English throughout
 - No hardcoded system paths, hostnames, IPs, secrets, or credentials
-- Use `/home/user/` as example paths in documentation
+- Use `~/` or `{{SKILL_WORKSPACE_PATH}}` for user home references in example paths
 - Every variable in the Config Variables table must be referenced in the pipeline steps
 - Include `version: 1.0.0` in the YAML frontmatter
 - Compatible with the [agentskills.io](https://agentskills.io/specification.md) open standard — include `name` and `description` at minimum
@@ -116,7 +115,7 @@ Create:
 - `references/` or `templates/` directory — if the skill references external files, create them as stubs with "CUSTOMISE THIS" notes
 - `scripts/` — if the skill needs executable scripts, include them with variables for paths
 
-### Step Six — Sanitize
+### Step Six — Sanitise
 
 Run a self-check:
 - [ ] No secrets, tokens, API keys, passwords?
@@ -168,9 +167,11 @@ Report the result to the user: what was created, where it lives, how to install 
 | `{skill-name}/SKILL.md` | Hermes skill definition |
 | `{skill-name}/README.md` | Installation and usage documentation |
 | `{skill-name}/.gitignore` | Ignore patterns |
-| `{skill-name}/templates/` | Templates if applicable |
-| `{skill-name}/references/` | Reference files if applicable |
-| `{skill-name}/scripts/` | Scripts if applicable |
+| `{skill-name}/templates/` | Templates if applicable\* |
+| `{skill-name}/references/` | Reference files if applicable\* |
+| `{skill-name}/scripts/` | Scripts if applicable\* |
+
+\* Created only when the skill genuinely needs them.
 
 ## Security Notes
 
@@ -187,3 +188,6 @@ Report the result to the user: what was created, where it lives, how to install 
 - **Inconsistent variable names.** Use the same `{{VAR}}` name in SKILL.md, README.md, and all supporting files.
 - **Skipping the research step.** For technical skills (e.g. Kubernetes, security scanning), research is essential to get the pipeline right.
 - **British English drift.** Review the final output for American spellings before committing.
+- **No `delegate_task` fallback.** If the user's Hermes agent does not support `delegate_task`, skip Steps Two (research) and Seven (peer review), or use a profile that supports them.
+- **Git push failure.** If `git push` fails (no network, no write access, detached HEAD), report the commit hash and tell the user to push manually with `git push origin main`.
+- **Interrupted intake.** If the user walks away mid-intake (Step One), save partial answers to a scratch file so they can resume later.
