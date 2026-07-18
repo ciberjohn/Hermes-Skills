@@ -21,21 +21,38 @@ Once installed, the skill is available as a slash command (`/medium-story`, `/sh
 Hermes also has a built-in Skills Hub with CLI commands for power users:
 
 ```bash
+# Add this repo as a permanent tap (external source)
+hermes skills tap add ciberjohn/Hermes-Skills
+
+# Install a specific skill from the tap
+hermes skills install ciberjohn/Hermes-Skills/medium-story
+
+# Or install directly from a URL
+hermes skills install https://raw.githubusercontent.com/ciberjohn/Hermes-Skills/main/medium-story/SKILL.md
+
+# List installed skills
+hermes skills list
+
 # Browse available skills from all sources
 hermes skills browse
 
 # Search across hub sources
 hermes skills search pipeline
-
-# Install from a URL or hub source directly
-hermes skills install https://raw.githubusercontent.com/ciberjohn/Hermes-Skills/main/medium-story/SKILL.md
-
-# Add this repo as a permanent tap (external source)
-hermes skills tap add ciberjohn-skills https://github.com/ciberjohn/Hermes-Skills
-hermes skills tap list
 ```
 
 Taps add the entire repo as an external skill directory. Skills update automatically when you update the repo.
+
+---
+
+### Natural Language Auto-Discovery
+
+You can also install a skill simply by telling your Hermes agent what you want:
+
+> "I need to write a Medium article about why SSH key management still fails in 2026."
+
+If the `medium-story` skill is installed, Hermes automatically matches your goal to the skill's description, loads the full instructions, and runs the pipeline. No slash command needed.
+
+The same applies to every installed skill. The skill descriptions at the top of each `SKILL.md` file are what Hermes uses for discovery, so the more descriptive they are, the better the agent picks the right one.
 
 If you already know the natural language approach above, stick with it — it asks you the configuration questions rather than requiring you to hunt down variables.
 
