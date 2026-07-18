@@ -16,6 +16,31 @@ Once installed, the skill is available as a slash command (`/medium-story`, `/sh
 
 ---
 
+### Alternative: Install via Skills Hub CLI (Advanced)
+
+Hermes also has a built-in Skills Hub with CLI commands for power users:
+
+```bash
+# Browse available skills from all sources
+hermes skills browse
+
+# Search across hub sources
+hermes skills search pipeline
+
+# Install from a URL or hub source directly
+hermes skills install https://raw.githubusercontent.com/ciberjohn/Hermes-Skills/main/medium-story/SKILL.md
+
+# Add this repo as a permanent tap (external source)
+hermes skills tap add ciberjohn-skills https://github.com/ciberjohn/Hermes-Skills
+hermes skills tap list
+```
+
+Taps add the entire repo as an external skill directory. Skills update automatically when you update the repo.
+
+If you already know the natural language approach above, stick with it — it asks you the configuration questions rather than requiring you to hunt down variables.
+
+---
+
 ### Quick Install — All Skills
 
 Copy and paste this to your Hermes agent:
