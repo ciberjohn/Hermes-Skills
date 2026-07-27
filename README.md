@@ -145,8 +145,6 @@ Copy and paste **one prompt** — your Hermes agent will do the rest:
 
 ## How Skills Work
 
-A full catalog of every skill — including bundled Hermes core skills — is available in **[SKILLS_REFERENCE.md](SKILLS_REFERENCE.md)**.
-
 Skills are an open standard (compatible with [agentskills.io](https://agentskills.io)). Each skill is a folder containing a `SKILL.md` file with metadata and instructions that tell your Hermes agent how to perform a specific task. Skills can also bundle scripts, reference materials, and templates.
 
 Once a skill is in your `~/.hermes/skills/` directory, Hermes discovers it at startup and loads only the name and description — just enough to know when it might be relevant. When you give Hermes a task that matches a skill's description, it loads the full instructions and executes the pipeline.
@@ -163,6 +161,7 @@ Once a skill is in your `~/.hermes/skills/` directory, Hermes discovers it at st
 | [excalidraw](excalidraw/) | Creates Excalidraw diagrams as JSON files, saved to a GitHub repo | Python helpers → JSON generation → git push | `/excalidraw [description]` |
 | [ai-projects](ai-projects/) | Syncs a Git repository of AI projects to a local directory | Clone → pull → status report | `/ai-projects [action]` |
 | [t3mp3st-autonomous-security](t3mp3st-autonomous-security/) | Autonomous security ops — installs T3MP3ST for recon, scanning, CVE hunting, and kill-chain ops with an LLM-driven AI agent | Setup → verify → configure scope → autonomous hunting → fleet assessment | `/t3mp3st-autonomous-security [target]` |
+| [social-poster](social-poster/) | Direct OAuth social media posting — no Docker, no database. Generate URLs, exchange PINs/codes, store tokens, and post via direct API calls | OAuth → token vault → post → schedule | `"post this to X"` |
 
 ---
 
@@ -184,6 +183,7 @@ Hermes-Skills/
 ├── excalidraw/               # Diagram generation
 ├── ai-projects/              # Repository sync
 ├── t3mp3st-autonomous-security/ # Autonomous security ops
+├── social-poster/               # Direct OAuth social media posting
 ├── templates/                # Shared templates
 │   └── persona-template.md   # Writing voice template
 └── scripts/                  # Shared scripts
@@ -214,3 +214,9 @@ Review each skill's config variables before first use. Never hardcode credential
 ## License
 
 MIT — use freely, adapt as needed. Attribution appreciated but not required.
+
+### Install social-poster
+
+Copy and paste:
+
+> "Install the social-poster skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills, copy social-poster/SKILL.md into ~/.hermes/skills/social-media/social-poster/SKILL.md, copy the scripts/ folder into ~/.social-poster/, set chmod 600 on all .json files, pip3 install requests_oauthlib if not already installed, and run python3 ~/.social-poster/social-poster.py vault:status to confirm it works. Then ask me for my TAILSCALE_HOST."
