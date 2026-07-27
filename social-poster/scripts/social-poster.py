@@ -156,6 +156,45 @@ def auth_threads(config):
     return {"url": url, "redirect_uri": redirect,
             "instruction": "Visit URL, authorize, paste the FULL redirect URL here."}
 
+def auth_mastodon(config):
+    inst = config.get("mastodon",{}).get("instance","")
+    cid = config.get("mastodon",{}).get("client_id","")
+    cs = config.get("mastodon",{}).get("client_secret","")
+    if not inst or not cid: return {"error": "MASTODON_INSTANCE, CLIENT_ID, CLIENT_SECRET required"}
+    state = _make_state()
+    redirect = f"https://{TAILSCALE_HOST}/oauth-callback"
+    scopes = "read write"
+    url = (f"https://{inst}/oauth/authorize?response_type=code&client_id={cid}"
+           f"&redirect_uri={urllib.parse.quote(redirect)}&state={state}&scope={urllib.parse.quote(scopes)}")
+    json.dump({"state": state}, open(os.path.join(CONFIG_DIR, ".mastodon_state.json"), "w"))
+    return {"url": url, "redirect_uri": redirect,
+            "instruction": "Visit URL, authorize, paste the FULL redirect URL here."}
+
+def auth_twitch(config):
+    cid = config.get("twitch",{}).get("client_id","")
+    if not cid: return {"error": "TWITCH_CLIENT_ID not configured"}
+    state = _make_state()
+    redirect = f"https://{TAILSCALE_HOST}/oauth-callback"
+    scopes = "user:read:email channel:read:stream_key"
+    url = (f"https://id.twitch.tv/oauth2/authorize?response_type=code&client_id={cid}"
+           f"&redirect_uri={urllib.parse.quote(redirect)}&state={state}&scope={urllib.parse.quote(scopes)}")
+    json.dump({"state": state}, open(os.path.join(CONFIG_DIR, ".twitch_state.json"), "w"))
+    return {"url": url, "redirect_uri": redirect,
+            "instruction": "Visit URL, authorize, paste the FULL redirect URL here."}
+
+def auth_reddit(config):
+    cid = config.get("reddit",{}).get("client_id","")
+    if not cid: return {"error": "REDDIT_CLIENT_ID not configured"}
+    state = _make_state()
+    redirect = f"https://{TAILSCALE_HOST}/oauth-callback"
+    scopes = "submit identity"
+    url = (f"https://www.reddit.com/api/v1/authorize?client_id={cid}"
+           f"&response_type=code&state={state}&redirect_uri={urllib.parse.quote(redirect)}"
+           f"&duration=permanent&scope={urllib.parse.quote(scopes)}")
+    json.dump({"state": state}, open(os.path.join(CONFIG_DIR, ".reddit_state.json"), "w"))
+    return {"url": url, "redirect_uri": redirect,
+            "instruction": "Visit URL, authorize, paste the FULL redirect URL here."}
+
 def _oauth_sign(method, url, params, consumer_secret, token_secret):
     import hmac, hashlib
     ps = "&".join(f"{urllib.parse.quote(k)}={urllib.parse.quote(v)}" for k,v in sorted(params.items()))
@@ -226,7 +265,8 @@ def main():
 
     if args[0] == "vault:status":
         vault = load_vault()
-        for p in ["x","linkedin","bluesky","instagram","threads","facebook","youtube"]:
+        for p in ["x","linkedin","bluesky","instagram","threads","facebook","youtube",
+                    "mastodon","twitch","reddit"]:
             t = vault.get(p,{})
             s = "✅" if (t.get("access_token") or t.get("app_password")) else ("⬜" if not t else "❌")
             print(f"  {p:15s} {s}")
@@ -234,7 +274,8 @@ def main():
     elif args[0].startswith("auth:"):
         plat = args[0].split(":")[1]
         fn = {"x":auth_x,"linkedin":auth_linkedin,"instagram":auth_instagram,
-              "facebook":auth_facebook,"youtube":auth_youtube,"threads":auth_threads}.get(plat)
+              "facebook":auth_facebook,"youtube":auth_youtube,"threads":auth_threads,
+              "mastodon":auth_mastodon,"twitch":auth_twitch,"reddit":auth_reddit}.get(plat)
         if not fn: print(f"Unknown platform: {plat}"); return
         r = fn(config)
         if "url" in r:
@@ -270,6 +311,44 @@ def main():
                 vault = load_vault(); vault["bluesky"]={"handle":h,"app_password":p}; save_vault(vault)
                 print(f"✅ Bluesky ({h}) saved!")
             else: print("❌ Set BLUESKY_HANDLE and BLUESKY_APP_PASSWORD in config")
+        elif plat == "mastodon":
+            inst = config.get("mastodon",{}).get("instance","")
+            cid = config.get("mastodon",{}).get("client_id","")
+            cs = config.get("mastodon",{}).get("client_secret","")
+            redirect = f"https://{TAILSCALE_HOST}/oauth-callback"
+            r = fetch(f"https://{inst}/oauth/token", method="POST",
+                data={"grant_type":"authorization_code","code":code,"redirect_uri":redirect,
+                      "client_id":cid,"client_secret":cs})
+            if r.get("access_token"):
+                vault = load_vault(); vault["mastodon"]={"access_token":r["access_token"],"instance":inst}; save_vault(vault)
+                print(f"✅ Mastodon ({inst}) connected!")
+            else: print(f"❌ {r.get('error','Failed')}")
+        elif plat == "twitch":
+            cid = config.get("twitch",{}).get("client_id","")
+            cs = config.get("twitch",{}).get("client_secret","")
+            redirect = f"https://{TAILSCALE_HOST}/oauth-callback"
+            r = fetch("https://id.twitch.tv/oauth2/token", method="POST",
+                data={"grant_type":"authorization_code","code":code,"redirect_uri":redirect,
+                      "client_id":cid,"client_secret":cs})
+            if r.get("access_token"):
+                vault = load_vault(); vault["twitch"]={"access_token":r["access_token"],
+                    "refresh_token":r.get("refresh_token","")}; save_vault(vault)
+                print("✅ Twitch connected!")
+            else: print(f"❌ {r.get('error','Failed')}")
+        elif plat == "reddit":
+            cid = config.get("reddit",{}).get("client_id","")
+            cs = config.get("reddit",{}).get("client_secret","")
+            redirect = f"https://{TAILSCALE_HOST}/oauth-callback"
+            import base64
+            auth = base64.b64encode(f"{cid}:{cs}".encode()).decode()
+            r = fetch("https://www.reddit.com/api/v1/access_token", method="POST",
+                data={"grant_type":"authorization_code","code":code,"redirect_uri":redirect},
+                headers={"Authorization": f"Basic {auth}"})
+            if r.get("access_token"):
+                vault = load_vault(); vault["reddit"]={"access_token":r["access_token"],
+                    "refresh_token":r.get("refresh_token","")}; save_vault(vault)
+                print("✅ Reddit connected!")
+            else: print(f"❌ {r.get('error','Failed')}")
         else:
             print(f"store:{plat} not implemented yet")
 

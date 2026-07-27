@@ -28,6 +28,13 @@ cat > ~/.social-poster/config.json << 'EOF'
   "threads": { "app_id": "{{THREADS_APP_ID}}", "app_secret": "{{THREADS_APP_SECRET}}" },
   "facebook": { "app_id": "{{FACEBOOK_APP_ID}}", "app_secret": "{{FACEBOOK_APP_SECRET}}" },
   "youtube": { "client_id": "{{YOUTUBE_CLIENT_ID}}", "client_secret": "{{YOUTUBE_CLIENT_SECRET}}" },
+  "mastodon": { "instance": "{{MASTODON_INSTANCE}}", "client_id": "{{MASTODON_CLIENT_ID}}", "client_secret": "{{MASTODON_CLIENT_SECRET}}" },
+  "twitch": { "client_id": "{{TWITCH_CLIENT_ID}}", "client_secret": "{{TWITCH_CLIENT_SECRET}}" },
+  "reddit": { "client_id": "{{REDDIT_CLIENT_ID}}", "client_secret": "{{REDDIT_CLIENT_SECRET}}" },
+  "discord": { "webhook_url": "{{DISCORD_WEBHOOK_URL}}" },
+  "slack": { "webhook_url": "{{SLACK_WEBHOOK_URL}}" },
+  "telegram": { "bot_token": "{{TELEGRAM_BOT_TOKEN}}", "chat_id": "{{TELEGRAM_CHAT_ID}}" },
+  "github": { "pat": "{{GITHUB_PAT}}", "repo": "{{GITHUB_REPO}}" },
   "bluesky": { "handle": "{{BLUESKY_HANDLE}}", "app_password": "{{BLUESKY_APP_PASSWORD}}" }
 }
 EOF
@@ -56,6 +63,13 @@ pip3 install requests_oauthlib
 | **Threads** | OAuth 2.0 code | App ID + Secret (developers.facebook.com) |
 | **Facebook** | OAuth 2.0 code | App ID + Secret (developers.facebook.com) |
 | **YouTube** | OAuth 2.0 code | Client ID + Secret (console.cloud.google.com) |
+| **Mastodon** | OAuth 2.0 code | Instance + Client ID/Secret (register on your instance) |
+| **Twitch** | OAuth 2.0 code | Client ID + Secret (dev.twitch.tv) |
+| **Reddit** | OAuth 2.0 code | Client ID + Secret (reddit.com/prefs/apps) |
+| **Discord** | Webhook URL | Webhook in channel settings |
+| **Slack** | Webhook URL | Webhook in Slack API |
+| **Telegram** | Bot token | Token from @BotFather |
+| **GitHub** | Personal Access Token | PAT from github.com/settings/tokens |
 
 ## Creating Developer Apps (Quick Guides)
 

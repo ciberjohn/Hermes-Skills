@@ -98,10 +98,22 @@ Each platform needs API credentials in `config.json`:
 | **X/Twitter** | `x.api_key`, `x.api_secret` | OAuth 1.0a (PIN-based) | `oob` |
 | **LinkedIn** | `linkedin.client_id`, `linkedin.client_secret` | OAuth 2.0 (code paste) | Tailscale URL |
 | **Instagram** | `instagram.app_id`, `instagram.app_secret` | OAuth 2.0 (code paste) | Tailscale URL |
-| **Threads** | `threads.app_id`, `threads.app_secret` | OAuth 2.0 (code paste) — *store command planned* | Tailscale URL |
-| **Facebook** | `facebook.app_id`, `facebook.app_secret` | OAuth 2.0 (code paste) — *store command planned* | Tailscale URL |
-| **YouTube** | `youtube.client_id`, `youtube.client_secret` | OAuth 2.0 (code paste) — *store command planned* | Tailscale URL |
+| **Threads** | `threads.app_id`, `threads.app_secret` | OAuth 2.0 (code paste) — *store planned* | Tailscale URL |
+| **Facebook** | `facebook.app_id`, `facebook.app_secret` | OAuth 2.0 (code paste) — *store planned* | Tailscale URL |
+| **YouTube** | `youtube.client_id`, `youtube.client_secret` | OAuth 2.0 (code paste) — *store planned* | tailnet/oauth-callback |
+| **Mastodon** | `mastodon.instance`, `mastodon.client_id`, `mastodon.client_secret` | OAuth 2.0 (code paste) | tailnet/oauth-callback |
+| **Twitch** | `twitch.client_id`, `twitch.client_secret` | OAuth 2.0 (code paste) | tailnet/oauth-callback |
+| **Reddit** | `reddit.client_id`, `reddit.client_secret` | OAuth 2.0 (code paste) | tailnet/oauth-callback |
 | **Bluesky** | `bluesky.handle`, `bluesky.app_password` | App password (direct) | N/A |
+
+### Webhook Platforms (no OAuth)
+
+| Platform | Config Key | Method | Setup |
+|----------|-----------|--------|-------|
+| **Discord** | `discord.webhook_url` | Webhook POST | Create webhook in channel settings |
+| **Slack** | `slack.webhook_url` | Webhook POST | Create webhook in Slack API |
+| **Telegram** | `telegram.bot_token`, `telegram.chat_id` | Bot API | Create bot via @BotFather |
+| **GitHub** | `github.pat`, `github.repo` | REST API | PAT from github.com/settings/tokens |
 
 ### Environment Variables
 
@@ -149,6 +161,13 @@ tailscale serve --bg --set-path /integrations/social/instagram-standalone 19876
 | **Instagram** | 2,200 chars | Image/video required |
 | **Threads** | 500 chars | Short and punchy |
 | **YouTube** | 5,000 chars (description) | Video upload, not text post |
+| **Mastodon** | 500 chars | Instance-dependent (some allow 500+) |
+| **Twitch** | N/A | Channel announcements, clip shares |
+| **Reddit** | 40,000 chars | Title max 300 chars |
+| **Discord** | 2,000 chars | Webhook embeds support rich formatting |
+| **Slack** | 40,000 chars | Block kit for rich messages |
+| **Telegram** | 4,096 chars | HTML/Markdown in messages |
+| **GitHub** | N/A | Issue body, unlimited |
 
 **Key rule:** Create separate posts per platform. Each has unique settings and length constraints.
 Never batch different platforms into one API call unless the copy fits the shortest limit.
