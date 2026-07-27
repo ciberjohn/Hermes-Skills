@@ -10,6 +10,8 @@ SESSION_PATH = os.path.join(DIR, ".x_session.json")
 
 if len(sys.argv) < 2 or not sys.argv[1].isdigit():
     print("Usage: python3 auth-x-step2.py <PIN>"); sys.exit(1)
+if not os.path.exists(SESSION_PATH):
+    print("❌ No session found. Run auth-x-step1.py first."); sys.exit(1)
 
 with open(CONFIG_PATH) as f: config = json.load(f)
 with open(SESSION_PATH) as f: session = json.load(f)

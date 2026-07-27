@@ -98,10 +98,16 @@ Each platform needs API credentials in `config.json`:
 | **X/Twitter** | `x.api_key`, `x.api_secret` | OAuth 1.0a (PIN-based) | `oob` |
 | **LinkedIn** | `linkedin.client_id`, `linkedin.client_secret` | OAuth 2.0 (code paste) | Tailscale URL |
 | **Instagram** | `instagram.app_id`, `instagram.app_secret` | OAuth 2.0 (code paste) | Tailscale URL |
-| **Threads** | `threads.app_id`, `threads.app_secret` | OAuth 2.0 (code paste) | Tailscale URL |
-| **Facebook** | `facebook.app_id`, `facebook.app_secret` | OAuth 2.0 (code paste) | Tailscale URL |
-| **YouTube** | `youtube.client_id`, `youtube.client_secret` | OAuth 2.0 (code paste) | Tailscale URL |
+| **Threads** | `threads.app_id`, `threads.app_secret` | OAuth 2.0 (code paste) — *store command planned* | Tailscale URL |
+| **Facebook** | `facebook.app_id`, `facebook.app_secret` | OAuth 2.0 (code paste) — *store command planned* | Tailscale URL |
+| **YouTube** | `youtube.client_id`, `youtube.client_secret` | OAuth 2.0 (code paste) — *store command planned* | Tailscale URL |
 | **Bluesky** | `bluesky.handle`, `bluesky.app_password` | App password (direct) | N/A |
+
+### Environment Variables
+
+All platforms support environment variable fallback. If `config.json` is absent, the script
+reads from env vars (e.g., `X_API_KEY`, `LINKEDIN_CLIENT_ID`, `BLUESKY_HANDLE`, etc.).
+See the `variables:` section in the frontmatter for the complete list.
 
 ### OAuth Flow Pattern
 

@@ -26,6 +26,8 @@ cat > ~/.social-poster/config.json << 'EOF'
   "linkedin": { "client_id": "{{LINKEDIN_CLIENT_ID}}", "client_secret": "{{LINKEDIN_CLIENT_SECRET}}" },
   "instagram": { "app_id": "{{INSTAGRAM_APP_ID}}", "app_secret": "{{INSTAGRAM_APP_SECRET}}" },
   "threads": { "app_id": "{{THREADS_APP_ID}}", "app_secret": "{{THREADS_APP_SECRET}}" },
+  "facebook": { "app_id": "{{FACEBOOK_APP_ID}}", "app_secret": "{{FACEBOOK_APP_SECRET}}" },
+  "youtube": { "client_id": "{{YOUTUBE_CLIENT_ID}}", "client_secret": "{{YOUTUBE_CLIENT_SECRET}}" },
   "bluesky": { "handle": "{{BLUESKY_HANDLE}}", "app_password": "{{BLUESKY_APP_PASSWORD}}" }
 }
 EOF
