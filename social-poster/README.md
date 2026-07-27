@@ -85,7 +85,7 @@ Your Hermes agent should guide you through each platform's developer portal step
 ### LinkedIn
 - Go to developer.linkedin.com → Create App
 - Add products: **Sign In with LinkedIn** + **Share on LinkedIn**
-- Add redirect URL: `https://{{YOUR_TAILSCALE_HOST}}/integrations/social/linkedin`
+- Add redirect URL: `https://{{CALLBACK_HOST}}/integrations/social/linkedin`
 - Scopes: `openid`, `profile`, `w_member_social` (no org scopes)
 
 ### Bluesky

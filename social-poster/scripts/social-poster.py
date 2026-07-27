@@ -19,7 +19,7 @@ if "hermes/profiles" in _user_dir:
 CONFIG_DIR = os.path.join(_user_dir, ".social-poster")
 CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
 VAULT_PATH = os.path.join(CONFIG_DIR, "vault.json")
-TAILSCALE_HOST = os.environ.get("CALLBACK_HOST", os.environ.get("TAILSCALE_HOST", "{{CALLBACK_HOST}}"))
+CALLBACK_HOST = os.environ.get("CALLBACK_HOST", "{{CALLBACK_HOST}}")
 
 def _make_state():
     """Generate cryptographically random state for CSRF protection."""
@@ -98,7 +98,7 @@ def auth_linkedin(config):
     cid = config.get("linkedin",{}).get("client_id","")
     if not cid: return {"error": "LINKEDIN_CLIENT_ID not configured"}
     state = _make_state()
-    redirect = f"https://{TAILSCALE_HOST}/integrations/social/linkedin"
+    redirect = f"https://{CALLBACK_HOST}/integrations/social/linkedin"
     scopes = "openid profile w_member_social"
     url = (f"https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id={cid}"
            f"&redirect_uri={urllib.parse.quote(redirect)}&state={state}&scope={urllib.parse.quote(scopes)}")
@@ -111,7 +111,7 @@ def auth_instagram(config):
     aid = config.get("instagram",{}).get("app_id","")
     if not aid: return {"error": "INSTAGRAM_APP_ID not configured"}
     state = _make_state()
-    redirect = f"https://{TAILSCALE_HOST}/integrations/social/instagram-standalone"
+    redirect = f"https://{CALLBACK_HOST}/integrations/social/instagram-standalone"
     scopes = "instagram_business_basic,instagram_business_content_publish"
     url = (f"https://www.instagram.com/oauth/authorize?enable_fb_login=0&client_id={aid}"
            f"&redirect_uri={urllib.parse.quote(redirect)}&state={state}&response_type=code&scope={urllib.parse.quote(scopes)}")
@@ -123,7 +123,7 @@ def auth_facebook(config):
     aid = config.get("facebook",{}).get("app_id","")
     if not aid: return {"error": "FACEBOOK_APP_ID not configured"}
     state = _make_state()
-    redirect = f"https://{TAILSCALE_HOST}/oauth-callback"
+    redirect = f"https://{CALLBACK_HOST}/oauth-callback"
     scopes = "pages_read_engagement,pages_manage_posts,pages_show_list"
     url = (f"https://www.facebook.com/v21.0/dialog/oauth?client_id={aid}"
            f"&redirect_uri={urllib.parse.quote(redirect)}&state={state}&scope={urllib.parse.quote(scopes)}&response_type=code")
@@ -148,7 +148,7 @@ def auth_threads(config):
     aid = config.get("threads",{}).get("app_id","")
     if not aid: return {"error": "THREADS_APP_ID not configured"}
     state = _make_state()
-    redirect = f"https://{TAILSCALE_HOST}/oauth-callback"
+    redirect = f"https://{CALLBACK_HOST}/oauth-callback"
     scopes = "threads_basic,threads_content_publish"
     url = (f"https://www.threads.net/oauth/authorize?client_id={aid}"
            f"&redirect_uri={urllib.parse.quote(redirect)}&state={state}&scope={urllib.parse.quote(scopes)}&response_type=code")
@@ -162,7 +162,7 @@ def auth_mastodon(config):
     cs = config.get("mastodon",{}).get("client_secret","")
     if not inst or not cid: return {"error": "MASTODON_INSTANCE, CLIENT_ID, CLIENT_SECRET required"}
     state = _make_state()
-    redirect = f"https://{TAILSCALE_HOST}/oauth-callback"
+    redirect = f"https://{CALLBACK_HOST}/oauth-callback"
     scopes = "read write"
     url = (f"https://{inst}/oauth/authorize?response_type=code&client_id={cid}"
            f"&redirect_uri={urllib.parse.quote(redirect)}&state={state}&scope={urllib.parse.quote(scopes)}")
@@ -174,7 +174,7 @@ def auth_twitch(config):
     cid = config.get("twitch",{}).get("client_id","")
     if not cid: return {"error": "TWITCH_CLIENT_ID not configured"}
     state = _make_state()
-    redirect = f"https://{TAILSCALE_HOST}/oauth-callback"
+    redirect = f"https://{CALLBACK_HOST}/oauth-callback"
     scopes = "user:read:email channel:read:stream_key"
     url = (f"https://id.twitch.tv/oauth2/authorize?response_type=code&client_id={cid}"
            f"&redirect_uri={urllib.parse.quote(redirect)}&state={state}&scope={urllib.parse.quote(scopes)}")
@@ -186,7 +186,7 @@ def auth_reddit(config):
     cid = config.get("reddit",{}).get("client_id","")
     if not cid: return {"error": "REDDIT_CLIENT_ID not configured"}
     state = _make_state()
-    redirect = f"https://{TAILSCALE_HOST}/oauth-callback"
+    redirect = f"https://{CALLBACK_HOST}/oauth-callback"
     scopes = "submit identity"
     url = (f"https://www.reddit.com/api/v1/authorize?client_id={cid}"
            f"&response_type=code&state={state}&redirect_uri={urllib.parse.quote(redirect)}"
@@ -226,7 +226,7 @@ def store_x_token(pin, oauth_token, oauth_token_secret, config):
 
 def store_linkedin_token(code, config):
     cid, cs = config["linkedin"]["client_id"], config["linkedin"]["client_secret"]
-    redirect = f"https://{TAILSCALE_HOST}/integrations/social/linkedin"
+    redirect = f"https://{CALLBACK_HOST}/integrations/social/linkedin"
     data = {"grant_type":"authorization_code","code":code,"redirect_uri":redirect,"client_id":cid,"client_secret":cs}
     result = fetch("https://www.linkedin.com/oauth/v2/accessToken", method="POST", data=data)
     if result.get("access_token"):
@@ -242,7 +242,7 @@ def store_linkedin_token(code, config):
 
 def store_instagram_token(code, config):
     aid, asc = config["instagram"]["app_id"], config["instagram"]["app_secret"]
-    redirect = f"https://{TAILSCALE_HOST}/integrations/social/instagram-standalone"
+    redirect = f"https://{CALLBACK_HOST}/integrations/social/instagram-standalone"
     data = {"client_id":aid,"client_secret":asc,"grant_type":"authorization_code","redirect_uri":redirect,"code":code}
     result = fetch("https://api.instagram.com/oauth/access_token", method="POST", data=data)
     if result.get("access_token"):
@@ -315,7 +315,7 @@ def main():
             inst = config.get("mastodon",{}).get("instance","")
             cid = config.get("mastodon",{}).get("client_id","")
             cs = config.get("mastodon",{}).get("client_secret","")
-            redirect = f"https://{TAILSCALE_HOST}/oauth-callback"
+            redirect = f"https://{CALLBACK_HOST}/oauth-callback"
             r = fetch(f"https://{inst}/oauth/token", method="POST",
                 data={"grant_type":"authorization_code","code":code,"redirect_uri":redirect,
                       "client_id":cid,"client_secret":cs})
@@ -326,7 +326,7 @@ def main():
         elif plat == "twitch":
             cid = config.get("twitch",{}).get("client_id","")
             cs = config.get("twitch",{}).get("client_secret","")
-            redirect = f"https://{TAILSCALE_HOST}/oauth-callback"
+            redirect = f"https://{CALLBACK_HOST}/oauth-callback"
             r = fetch("https://id.twitch.tv/oauth2/token", method="POST",
                 data={"grant_type":"authorization_code","code":code,"redirect_uri":redirect,
                       "client_id":cid,"client_secret":cs})
@@ -338,7 +338,7 @@ def main():
         elif plat == "reddit":
             cid = config.get("reddit",{}).get("client_id","")
             cs = config.get("reddit",{}).get("client_secret","")
-            redirect = f"https://{TAILSCALE_HOST}/oauth-callback"
+            redirect = f"https://{CALLBACK_HOST}/oauth-callback"
             import base64
             auth = base64.b64encode(f"{cid}:{cs}".encode()).decode()
             r = fetch("https://www.reddit.com/api/v1/access_token", method="POST",

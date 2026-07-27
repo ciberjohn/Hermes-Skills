@@ -23,8 +23,7 @@ variables:
   CALLBACK_HOST:
     description: >
       Your OAuth callback base URL. Must be reachable by your browser when you authorize.
-      Examples: Tailscale hostname (mymachine.tail-abc123.ts.net), nginx proxy manager
-      domain (social.example.com), Cloudflare Tunnel, or your VPS public hostname.
+      Examples: Tailscale hostname, nginx proxy manager domain, Cloudflare Tunnel, or your VPS public hostname.
       The path is appended automatically for each platform.
     required: true
     env_var: CALLBACK_HOST
