@@ -84,10 +84,9 @@ exact URLs, exact labels to click.
 2. User opens the URL, authorizes, gets redirected to Tailscale URL with `?code=`
 3. Agent extracts code via callback server, runs `store:linkedin <code>`
 
-### Permissions
+### Permissions (scopes requested by code)
 - `openid` — Verify LinkedIn member identity
 - `profile` — Read member's profile
-- `email` — Read member's email address
 - `w_member_social` — Create posts on behalf of the member
 
 ---
@@ -168,8 +167,8 @@ python3 social-poster.py store:bluesky
 2. Go to **Preferences → Development → New Application**
 3. Fill in:
    - **Application name:** "Social Poster"
-   - **Redirect URI:** `urn:ietf:wg:oauth:2.0:oob`
-   - **Scopes:** check only `read:statuses` and `write:statuses` — these are the minimum for a posting bot. Do not use the broader `read` and `write` scopes unless you need additional functionality (follows, blocks, account management).
+   - **Redirect URI:** `https://{{CALLBACK_HOST}}/oauth-callback`
+   - **Scopes:** check `read write` — note: `read` and `write` are the broad scopes needed for the auth flow to match the code. For a posting-only bot, these are sufficient.
 4. Click **"Submit"**
 5. Copy **Client Key** (this is your `client_id`) and **Client Secret**
 6. Save in `config.json` under `mastodon.instance`, `mastodon.client_id`, `mastodon.client_secret`
@@ -213,10 +212,9 @@ curl -X POST \
 6. Click **"New Secret"** → copy **Client Secret**
 7. Save in `config.json` under `twitch.client_id` and `twitch.client_secret`
 
-### Required Scopes for posting
-- `user:write:chat` — Send chat messages (if posting to chat)
-- `channel:manage:broadcast` — Manage stream information
-- `moderator:manage:announcements` — Send announcements
+### Scopes (for token validation — posting not yet implemented)
+- `user:read:email` — Read user email
+- `channel:read:stream_key` — Read stream key (basic channel access)
 
 ### Auth Flow
 1. Agent runs `python3 social-poster.py auth:twitch`
@@ -235,7 +233,7 @@ curl -X POST \
 
 1. Go to **https://www.reddit.com/prefs/apps** (log in if prompted)
 2. Scroll to bottom → click **"Create Another App"** or **"Create App"**
-3. Select **"script"** type (NOT "web app")
+3. Select **"web app"** type
 4. Fill:
    - **Name:** anything (e.g., "Social Poster")
    - **Redirect URI:** `https://{{CALLBACK_HOST}}/oauth-callback`
@@ -244,13 +242,10 @@ curl -X POST \
 7. The **client_secret** is the longer string labeled "secret"
 8. Save in `config.json` under `reddit.client_id` and `reddit.client_secret`
 
-**Important:** The app MUST be "script" type, not "web app". Script apps use
-password-based OAuth flow (no interactive user authorization).
-
 ### Auth Flow
-1. Agent uses `client_id` + `client_secret` + Reddit username/password to get an access token
-2. Token is sent via HTTP Basic auth to `POST /api/v1/access_token`
-3. Agent runs `store:reddit` to save the token
+1. Agent runs `python3 social-poster.py auth:reddit`
+2. User authorizes in browser, gets redirected back with `?code=`
+3. Agent runs `store:reddit <code>` to exchange for access token
 
 ---
 
@@ -274,7 +269,7 @@ password-based OAuth flow (no interactive user authorization).
 
 ### Posting
 ```python
-python3 social-poster.py post discord "Hello from Social Poster!"
+python3 post.py --platforms discord --text "Hello from Social Poster!"
 ```
 
 ---
@@ -297,7 +292,7 @@ python3 social-poster.py post discord "Hello from Social Poster!"
 
 ### Posting
 ```python
-python3 social-poster.py post slack "Hello from Social Poster!"
+python3 post.py --platforms slack --text "Hello from Social Poster!"
 ```
 
 ---
@@ -327,8 +322,8 @@ python3 social-poster.py post slack "Hello from Social Poster!"
 > `/getUpdates` — the chat_id will be a negative number.
 
 ### Posting
-```python
-python3 social-poster.py post telegram "<message>"
+```
+python3 post.py --platforms telegram --text "Hello from Social Poster!"
 ```
 
 ---
@@ -364,8 +359,8 @@ python3 social-poster.py post telegram "<message>"
 7. Save in `config.json` under `github.pat` and `github.repo` (format: `username/repo`)
 
 ### Posting
-```python
-python3 social-poster.py post github "Issue title" "Issue body"
+```bash
+python3 post.py --platforms github --title "Issue title" --text "Issue body"
 ```
 
 ---
@@ -388,9 +383,9 @@ python3 social-poster.py post github "Issue title" "Issue body"
 5. Under **"Threads"** in the sidebar, you'll see:
    - **"Get started"** — follow the on-screen wizard
    - **"Create an app"** → link your Threads professional account
-6. Add your **Redirect URI**:
+6. Add your **Redirect URI** (must match what the code uses):
    ```
-   https://{{CALLBACK_HOST}}/integrations/social/threads
+   https://{{CALLBACK_HOST}}/oauth-callback
    ```
 7. Go to **"Settings" → "Basic"** — copy **Threads App ID** and **Threads App Secret**
 8. Set the app to **Live** mode (toggle in the dashboard header)
@@ -424,7 +419,7 @@ python3 social-poster.py post github "Issue title" "Issue body"
 4. Go to **"Add Product"** → find **"Facebook Login"** → **"Set Up"**
 5. Under **"Facebook Login" → "Settings"**, add:
    ```
-   https://{{CALLBACK_HOST}}/integrations/social/facebook
+   https://{{CALLBACK_HOST}}/oauth-callback
    ```
    as a **Valid OAuth Redirect URI**
 6. Under **"Facebook Login" → "Settings"** → enable **"Embedded Browser OAuth Login"**

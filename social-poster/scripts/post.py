@@ -189,6 +189,7 @@ def main():
         "mastodon": post_mastodon, "twitch": lambda t, v, c: post_twitch(t, v, c), "reddit": post_reddit,
         "discord": lambda t, v, c: post_discord(t, c), "slack": lambda t, v, c: post_slack(t, c),
         "telegram": lambda t, v, c: post_telegram(t, c),
+        "github": lambda t, v, c: post_github(args.title, t, c),
     }
 
     platforms = [pl.strip() for pl in args.platforms.split(",") if pl.strip()]

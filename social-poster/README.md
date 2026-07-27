@@ -99,7 +99,7 @@ Your Hermes agent should guide you through each platform's developer portal step
 
 ### Instagram / Threads / Facebook
 - Go to developers.facebook.com → Create App (type: Business)
-- Add product: **Instagram Basic Display** for Instagram
+- Add product: **Instagram API with Instagram Login** for Instagram
 - Set app to **Live** mode (not Development)
 - Add your Instagram account as a **Tester**
 - Add redirect URL to Valid OAuth Redirect URIs
