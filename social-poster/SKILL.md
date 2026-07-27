@@ -201,7 +201,7 @@ python3 ~/.social-poster/oauth-callback-server.py 19876 &
 # The paths you need depend on which platforms you use:
 # - /oauth-callback                          # For Mastodon, Twitch, Reddit, etc.
 # - /integrations/social/linkedin            # If using LinkedIn
-# - /integrations/social/instagram-standalone # If using Instagram
+# - /integrations/social/instagram            # If using Instagram
 ```
 
 ### How the Callback Server Works

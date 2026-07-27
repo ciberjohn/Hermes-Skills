@@ -118,7 +118,7 @@ def auth_instagram(config):
     aid = config.get("instagram",{}).get("app_id","")
     if not aid: return {"error": "INSTAGRAM_APP_ID not configured"}
     state = _make_state()
-    redirect = f"https://{CALLBACK_HOST}/integrations/social/instagram-standalone"
+    redirect = f"https://{CALLBACK_HOST}/integrations/social/instagram"
     scopes = "instagram_business_basic,instagram_business_content_publish"
     url = (f"https://www.instagram.com/oauth/authorize?enable_fb_login=0&client_id={aid}"
            f"&redirect_uri={urllib.parse.quote(redirect)}&state={state}&response_type=code&scope={urllib.parse.quote(scopes)}")
@@ -249,7 +249,7 @@ def store_linkedin_token(code, config):
 
 def store_instagram_token(code, config):
     aid, asc = config["instagram"]["app_id"], config["instagram"]["app_secret"]
-    redirect = f"https://{CALLBACK_HOST}/integrations/social/instagram-standalone"
+    redirect = f"https://{CALLBACK_HOST}/integrations/social/instagram"
     data = {"client_id":aid,"client_secret":asc,"grant_type":"authorization_code","redirect_uri":redirect,"code":code}
     result = fetch("https://api.instagram.com/oauth/access_token", method="POST", data=data)
     if result.get("access_token"):
