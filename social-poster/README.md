@@ -6,10 +6,15 @@
 
 Copy-paste this to your Hermes agent (any profile):
 
-```
-I want to install the social-poster skill. Load skill-writer, load social-poster from github.com/ciberjohn/Hermes-Skills, and set up the scripts in ~/.social-poster/. Also needs `CALLBACK_HOST` — your OAuth redirect base URL (Tailscale hostname, NPM domain,
-Cloudflare Tunnel, or your VPS hostname). Must be reachable by your browser when you
-authorize app connections. Set it as en env var or answer when the agent asks.
+```text
+I want to install the social-poster skill. Load skill-writer, load
+social-poster from github.com/ciberjohn/Hermes-Skills, and set up
+the scripts in ~/.social-poster/.
+
+Also needs `CALLBACK_HOST` — your OAuth redirect base URL (Tailscale
+hostname, NPM domain, Cloudflare Tunnel, or your VPS hostname). Must
+be reachable by your browser when you authorize app connections.
+Set it as an env var or answer when the agent asks.
 ```
 
 Or install manually:

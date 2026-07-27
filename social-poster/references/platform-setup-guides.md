@@ -96,7 +96,12 @@ python3 social-poster.py store:bluesky
 
 **Difficulty:** Medium  
 **Required:** A Facebook developer account, an Instagram account  
-**Time:** 15 minutes
+**Time:** 15 minutes  
+
+> **Note:** Meta deprecated Instagram Basic Display in April 2024. New apps
+> should use **Instagram Login** with the Limited Login flow instead. If the
+> Basic Display product is no longer available in your Facebook app, use
+> Instagram Login product with scopes `instagram_basic,instagram_content_publish`.
 
 ### Step-by-step
 

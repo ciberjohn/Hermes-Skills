@@ -121,12 +121,13 @@ def post_mastodon(text, vault, config):
               headers={"Authorization": f"Bearer {tok}"})
     return r.get("id", f"Result: {r}")
 
-def post_twitch(text, vault):
+def post_twitch(text, vault, config):
     tok = vault.get("twitch", {}).get("access_token", "")
+    cid = config.get("twitch", {}).get("client_id", "")
     if not tok: return "No Twitch token"
-    # Announcement to your channel — requires broadcaster_id
+    if not cid: return "No Twitch client_id in config"
     r = fetch("https://api.twitch.tv/helix/channels", method="GET",
-              headers={"Authorization": f"Bearer {tok}", "Client-Id": "twitch"})
+              headers={"Authorization": f"Bearer {tok}", "Client-Id": cid})
     return f"Twitch posting requires broadcaster channel ID. Auth valid."
 
 def post_reddit(text, vault):
@@ -184,9 +185,10 @@ def main():
         text = f"{text}\n\n{args.link}" if text else args.link
 
     platform_map = {
-        "x": post_x, "linkedin": post_linkedin, "bluesky": post_bluesky,
-        "mastodon": post_mastodon, "twitch": post_twitch, "reddit": post_reddit,
-        "discord": post_discord, "slack": post_slack, "telegram": post_telegram,
+        "x": lambda t, v, c: post_x(t, v, c), "linkedin": post_linkedin, "bluesky": post_bluesky,
+        "mastodon": post_mastodon, "twitch": lambda t, v, c: post_twitch(t, v, c), "reddit": post_reddit,
+        "discord": lambda t, v, c: post_discord(t, c), "slack": lambda t, v, c: post_slack(t, c),
+        "telegram": lambda t, v, c: post_telegram(t, c),
     }
 
     platforms = [pl.strip() for pl in args.platforms.split(",") if pl.strip()]
@@ -197,7 +199,7 @@ def main():
             results[pl] = "Unknown platform"
             continue
         try:
-            r = fn(text, vault, config) if pl in ("x", "mastodon") else fn(text, vault) if pl != "github" else post_github(args.title, text, config)
+            r = fn(text, vault, config) if pl in ("x", "mastodon", "twitch") else fn(text, vault) if pl not in ("discord", "slack", "telegram") else fn(text, config)
             results[pl] = r
         except Exception as e:
             results[pl] = f"Error: {e}"

@@ -25,6 +25,13 @@ def _make_state():
     """Generate cryptographically random state for CSRF protection."""
     return base64.b64encode(os.urandom(24)).decode().strip("=")
 
+def _write_state_file(path, data):
+    """Write OAuth state/session data with restricted permissions."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as f:
+        json.dump(data, f)
+    os.chmod(path, 0o600)
+
 # --- Config Loader ---
 def load_config():
     if os.path.exists(CONFIG_PATH):
@@ -103,7 +110,7 @@ def auth_linkedin(config):
     url = (f"https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id={cid}"
            f"&redirect_uri={urllib.parse.quote(redirect)}&state={state}&scope={urllib.parse.quote(scopes)}")
     # Store state for CSRF validation
-    json.dump({"state": state}, open(os.path.join(CONFIG_DIR, ".linkedin_state.json"), "w"))
+    _write_state_file(os.path.join(CONFIG_DIR, ".linkedin_state.json"), {"state": state})
     return {"url": url, "redirect_uri": redirect,
             "instruction": "Visit URL, authorize, paste the FULL redirect URL with ?code=... here."}
 
@@ -115,7 +122,7 @@ def auth_instagram(config):
     scopes = "instagram_business_basic,instagram_business_content_publish"
     url = (f"https://www.instagram.com/oauth/authorize?enable_fb_login=0&client_id={aid}"
            f"&redirect_uri={urllib.parse.quote(redirect)}&state={state}&response_type=code&scope={urllib.parse.quote(scopes)}")
-    json.dump({"state": state}, open(os.path.join(CONFIG_DIR, ".instagram_state.json"), "w"))
+    _write_state_file(os.path.join(CONFIG_DIR, ".instagram_state.json"), {"state": state})
     return {"url": url, "redirect_uri": redirect,
             "instruction": "Visit URL, authorize, paste the FULL redirect URL here."}
 
@@ -127,7 +134,7 @@ def auth_facebook(config):
     scopes = "pages_read_engagement,pages_manage_posts,pages_show_list"
     url = (f"https://www.facebook.com/v21.0/dialog/oauth?client_id={aid}"
            f"&redirect_uri={urllib.parse.quote(redirect)}&state={state}&scope={urllib.parse.quote(scopes)}&response_type=code")
-    json.dump({"state": state}, open(os.path.join(CONFIG_DIR, ".facebook_state.json"), "w"))
+    _write_state_file(os.path.join(CONFIG_DIR, ".facebook_state.json"), {"state": state})
     return {"url": url, "redirect_uri": redirect,
             "instruction": "Visit URL, authorize, paste the FULL redirect URL here."}
 
@@ -140,7 +147,7 @@ def auth_youtube(config):
     url = (f"https://accounts.google.com/o/oauth2/v2/auth?client_id={cid}"
            f"&redirect_uri={urllib.parse.quote(redirect)}&state={state}&response_type=code&scope={urllib.parse.quote(scopes)}"
            f"&access_type=offline&prompt=consent")
-    json.dump({"state": state}, open(os.path.join(CONFIG_DIR, ".youtube_state.json"), "w"))
+    _write_state_file(os.path.join(CONFIG_DIR, ".youtube_state.json"), {"state": state})
     return {"url": url, "redirect_uri": redirect,
             "instruction": "Visit URL, authorize. Browser will redirect to localhost - copy that URL."}
 
@@ -152,7 +159,7 @@ def auth_threads(config):
     scopes = "threads_basic,threads_content_publish"
     url = (f"https://www.threads.net/oauth/authorize?client_id={aid}"
            f"&redirect_uri={urllib.parse.quote(redirect)}&state={state}&scope={urllib.parse.quote(scopes)}&response_type=code")
-    json.dump({"state": state}, open(os.path.join(CONFIG_DIR, ".threads_state.json"), "w"))
+    _write_state_file(os.path.join(CONFIG_DIR, ".threads_state.json"), {"state": state})
     return {"url": url, "redirect_uri": redirect,
             "instruction": "Visit URL, authorize, paste the FULL redirect URL here."}
 
@@ -166,7 +173,7 @@ def auth_mastodon(config):
     scopes = "read write"
     url = (f"https://{inst}/oauth/authorize?response_type=code&client_id={cid}"
            f"&redirect_uri={urllib.parse.quote(redirect)}&state={state}&scope={urllib.parse.quote(scopes)}")
-    json.dump({"state": state}, open(os.path.join(CONFIG_DIR, ".mastodon_state.json"), "w"))
+    _write_state_file(os.path.join(CONFIG_DIR, ".mastodon_state.json"), {"state": state})
     return {"url": url, "redirect_uri": redirect,
             "instruction": "Visit URL, authorize, paste the FULL redirect URL here."}
 
@@ -178,7 +185,7 @@ def auth_twitch(config):
     scopes = "user:read:email channel:read:stream_key"
     url = (f"https://id.twitch.tv/oauth2/authorize?response_type=code&client_id={cid}"
            f"&redirect_uri={urllib.parse.quote(redirect)}&state={state}&scope={urllib.parse.quote(scopes)}")
-    json.dump({"state": state}, open(os.path.join(CONFIG_DIR, ".twitch_state.json"), "w"))
+    _write_state_file(os.path.join(CONFIG_DIR, ".twitch_state.json"), {"state": state})
     return {"url": url, "redirect_uri": redirect,
             "instruction": "Visit URL, authorize, paste the FULL redirect URL here."}
 
@@ -191,7 +198,7 @@ def auth_reddit(config):
     url = (f"https://www.reddit.com/api/v1/authorize?client_id={cid}"
            f"&response_type=code&state={state}&redirect_uri={urllib.parse.quote(redirect)}"
            f"&duration=permanent&scope={urllib.parse.quote(scopes)}")
-    json.dump({"state": state}, open(os.path.join(CONFIG_DIR, ".reddit_state.json"), "w"))
+    _write_state_file(os.path.join(CONFIG_DIR, ".reddit_state.json"), {"state": state})
     return {"url": url, "redirect_uri": redirect,
             "instruction": "Visit URL, authorize, paste the FULL redirect URL here."}
 
@@ -282,7 +289,7 @@ def main():
             print(f"\n🔗 {r['url']}\n")
             print(f"📝 {r['instruction']}")
             if "oauth_token" in r:
-                json.dump(r, open(os.path.join(CONFIG_DIR, ".x_session.json"), "w"))
+                _write_state_file(os.path.join(CONFIG_DIR, ".x_session.json"), r)
         else:
             print(f"❌ {r.get('error','Unknown')}")
 

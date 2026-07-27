@@ -46,8 +46,8 @@ scripts:
 
 | Attribute | Value |
 |-----------|-------|
-| Total platforms | 15 |
-| OAuth platforms | X, LinkedIn, Instagram, Facebook, Threads, YouTube, Mastodon, Twitch, Reddit |
+| Total platforms | 14 |
+| OAuth platforms | X, LinkedIn, Instagram, Mastodon, Twitch, Reddit, Threads, Facebook, YouTube |
 | Webhook/Token | Discord, Slack, Telegram, GitHub |
 | Direct | Bluesky |
 | Auth | OAuth 1.0a, OAuth 2.0, App Passwords, Webhooks, PATs |
@@ -57,15 +57,15 @@ scripts:
 ### 1. "What networks can you post to?"
 
 The agent should:
-1. Run `python3 social-poster.py vault:status` to check which platforms have stored tokens
-2. Report the full list of 15 platforms, marking connected ones with ✅ and the rest as ⬜
+1. Run `python3 ~/.social-poster/social-poster.py vault:status` to check which platforms have stored tokens
+2. Report the full list of 14 platforms, marking connected ones with ✅ and the rest as ⬜
 3. Offer: "Want me to guide you through setting up any of them?"
 
 Example response:
 ```
-15 platforms supported. Currently connected:
+14 platforms supported. Currently connected:
   ✅ X, LinkedIn, Bluesky
-  ⬜ Instagram, Mastodon, Twitch, Reddit, Discord, Slack, Telegram, GitHub, Threads, Facebook, YouTube, Pinterest
+  ⬜ Instagram, Mastodon, Twitch, Reddit, Discord, Slack, Telegram, GitHub, Threads, Facebook, YouTube
 Say 'connect [platform]' and I'll walk you through it."
 ```
 

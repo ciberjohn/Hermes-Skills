@@ -69,7 +69,7 @@ Then set `CALLBACK_HOST` env var or config to your proxy's base URL.
 | Reddit | `www.reddit.com/api/v1/access_token` | authorization_code (Basic auth) |
 | Threads | `graph.threads.net/oauth/access_token` | authorization_code |
 | YouTube | `oauth2.googleapis.com/token` | authorization_code |
-| Facebook | `graph.facebook.com/v21.0/oauth/access_token` | authorization_code |
+| Facebook | `graph.facebook.com/oauth/access_token` | authorization_code (uses latest API) |
 
 ## Instagram Long-Lived Token Exchange
 
