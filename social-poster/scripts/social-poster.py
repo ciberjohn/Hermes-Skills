@@ -19,7 +19,7 @@ if "hermes/profiles" in _user_dir:
 CONFIG_DIR = os.path.join(_user_dir, ".social-poster")
 CONFIG_PATH = os.path.join(CONFIG_DIR, "config.json")
 VAULT_PATH = os.path.join(CONFIG_DIR, "vault.json")
-TAILSCALE_HOST = os.environ.get("TAILSCALE_HOST", "{{TAILSCALE_HOST}}")
+TAILSCALE_HOST = os.environ.get("CALLBACK_HOST", os.environ.get("TAILSCALE_HOST", "{{CALLBACK_HOST}}"))
 
 def _make_state():
     """Generate cryptographically random state for CSRF protection."""

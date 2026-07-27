@@ -4,43 +4,58 @@
 
 The core innovation that avoids redirect URI whitelisting:
 
-1. **Auth URL generated** by `social-poster.py auth:<platform>` — contains the platform's whitelisted redirect URI
+1. **Auth URL generated** by `social-poster.py auth:<platform>` — contains the platform's registered redirect URI
 2. **User authenticates** — Opens URL in browser, authorizes
-3. **Code captured** — Browser redirects to the redirect URI with `?code=XXXX`
-4. **Redirect fails (intentionally)** — The redirect URI goes to a Tailscale-hosted callback server (`/oauth-callback`) or localhost (for YouTube). The code is visible in the address bar
-5. **Exchange** — Agent extracts code and calls `store:<platform>` to exchange for access token
+3. **Code captured** — Browser redirects to the redirect URI with `?code=XXXX` 
+4. **Redirect hits your reverse proxy** — The redirect URI points to a URL served by your reverse proxy (Tailscale Serve, NPM, Cloudflare Tunnel, etc.), which forwards to the local callback server
+5. **Exchange** — Agent reads the code from `last_code.txt` and calls `store:<platform>` to exchange for access token
 
 ## Per-Platform Redirect URIs
 
 | Platform | Redirect URI Used | Notes |
 |----------|------------------|-------|
-| **LinkedIn** | `https://{{TAILSCALE_HOST}}/integrations/social/linkedin` | Must match whitelisted URI in LinkedIn developer portal |
-| **Instagram** | `https://{{TAILSCALE_HOST}}/integrations/social/instagram-standalone` | Must match whitelisted URI in Facebook app |
-| **Facebook** | `https://{{TAILSCALE_HOST}}/oauth-callback` | Generic callback path |
-| **Threads** | `https://{{TAILSCALE_HOST}}/oauth-callback` | Generic callback path |
+| **LinkedIn** | `https://{{CALLBACK_HOST}}/integrations/social/linkedin` | Must match whitelisted URI in LinkedIn developer portal |
+| **Instagram** | `https://{{CALLBACK_HOST}}/integrations/social/instagram-standalone` | Must match whitelisted URI in Facebook app |
+| **Facebook** | `https://{{CALLBACK_HOST}}/oauth-callback` | Generic callback path |
+| **Threads** | `https://{{CALLBACK_HOST}}/oauth-callback` | Generic callback path |
+| **Mastodon** | `https://{{CALLBACK_HOST}}/oauth-callback` | Register this URI in your Mastodon app |
+| **Twitch** | `https://{{CALLBACK_HOST}}/oauth-callback` | Register this URI in your Twitch dev app |
+| **Reddit** | `https://{{CALLBACK_HOST}}/oauth-callback` | Register this URI in your Reddit app |
 | **YouTube** | `http://localhost` | Works because user is on their own machine |
 | **X/Twitter** | N/A (PIN-based OAuth 1.0a) | No redirect URI needed |
 
-## Pattern: OAuth 2.0 Tailscale Serve Flow (Cross-Machine)
+## Cross-Machine OAuth (Reverse Proxy)
 
-When the agent is on a remote VPS and the user is on a different machine:
+When the agent is on a remote machine and the user is on a different machine,
+OAuth redirect URLs need to point somewhere the user's browser can reach.
 
-### Setup (one-time — all paths needed)
+**You need a reverse proxy** that makes `127.0.0.1:19876` accessible via HTTPS
+at a URL your browser can reach. The URL does NOT need to be public on the
+internet — just reachable by YOUR browser.
+
+Options: Tailscale Serve, Cloudflare Tunnel, Nginx Proxy Manager, ngrok,
+or your VPS hostname with HTTPS.
+
+### Minimum Setup
+
 ```bash
+# Start the callback server
 python3 ~/.social-poster/oauth-callback-server.py 19876 &
 
-# Each platform that uses a specific whitelisted path needs its own route
-tailscale serve --bg --set-path /oauth-callback 19876
-tailscale serve --bg --set-path /integrations/social/linkedin 19876
-tailscale serve --bg --set-path /integrations/social/instagram-standalone 19876
+# Configure your reverse proxy to route these paths to 127.0.0.1:19876:
+# - /oauth-callback
+# - /integrations/social/linkedin       (if using LinkedIn)
+# - /integrations/social/instagram-standalone  (if using Instagram)
 ```
 
+Then set `CALLBACK_HOST` env var or config to your proxy's base URL.
+
 ### Critical Rules
+
 - **Redirect URI MUST match exactly** between auth URL and token exchange POST
-- **`state` parameter is REQUIRED for all OAuth 2.0 flows** — prevents CSRF attacks. Generated as 32 bytes of crypto-random base64, stored in `~/.social-poster/.{platform}_state.json`, cleaned up on successful exchange
-- **Tailscale Serve must be running BEFORE** the user clicks the OAuth URL
-- **Existing whitelisted URIs (from old Postiz setups) can be repurposed** as Tailscale Serve proxy paths
-- **The callback server stays alive** — kill when done: `kill %1`
+- **`state` parameter is REQUIRED for all OAuth 2.0 flows** — prevents CSRF attacks
+- **Reverse proxy must be running BEFORE** the user clicks the OAuth URL
+- **Existing whitelisted URIs (from old Postiz setups) can be reused** via your reverse proxy
 
 ## Platform Token Endpoints
 
@@ -49,6 +64,9 @@ tailscale serve --bg --set-path /integrations/social/instagram-standalone 19876
 | X/Twitter | `api.twitter.com/oauth/access_token` | OAuth 1.0a (PIN) |
 | LinkedIn | `linkedin.com/oauth/v2/accessToken` | authorization_code |
 | Instagram | `api.instagram.com/oauth/access_token` | authorization_code |
+| Mastodon | `{instance}/oauth/token` | authorization_code |
+| Twitch | `id.twitch.tv/oauth2/token` | authorization_code |
+| Reddit | `www.reddit.com/api/v1/access_token` | authorization_code (Basic auth) |
 | Threads | `graph.threads.net/oauth/access_token` | authorization_code |
 | YouTube | `oauth2.googleapis.com/token` | authorization_code |
 | Facebook | `graph.facebook.com/v21.0/oauth/access_token` | authorization_code |
@@ -67,7 +85,7 @@ Returns 58-day token. Uses POST to avoid leaking credentials in server logs.
 
 ## X/Twitter OAuth 1.0a Flow
 
-Uses `requests_oauthlib.OAuth1Session` (standalone scripts) or manual OAuth signing (unified CLI):
+Uses `requests_oauthlib.OAuth1Session` or manual OAuth signing:
 1. `fetch_request_token()` with `callback_uri='oob'`
 2. `authorization_url()` generates the URL
 3. User gets PIN from web page
@@ -82,6 +100,9 @@ Dependencies: `pip3 install requests_oauthlib`
   "x": {"access_token": "...", "access_secret": "...", "screen_name": "user"},
   "linkedin": {"access_token": "...", "refresh_token": "...", "expires_in": 5184000},
   "instagram": {"access_token": "...", "expires_in": 5184000, "user_id": "..."},
+  "mastodon": {"access_token": "...", "instance": "mastodon.social"},
+  "twitch": {"access_token": "...", "refresh_token": "..."},
+  "reddit": {"access_token": "...", "refresh_token": "..."},
   "bluesky": {"handle": "user.bsky.social", "app_password": "xxxx-xxxx-xxxx-xxxx"}
 }
 ```

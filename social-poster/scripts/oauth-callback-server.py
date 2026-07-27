@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """OAuth callback server — captures redirect code to secure path.
 Usage: python3 oauth-callback-server.py <port>
-       tailscale serve --bg --set-path /oauth-callback <port>
+Use with a reverse proxy (Tailscale Serve, NPM, Cloudflare Tunnel, etc.)
+to make this accessible at your CALLBACK_HOST URL.
 """
 import http.server, urllib.parse, sys, os, secrets
 

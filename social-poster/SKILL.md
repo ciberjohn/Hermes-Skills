@@ -20,10 +20,14 @@ variables:
   SOCIAL_POSTER_DIR:
     description: "Directory for social-poster scripts and config"
     default: "~/.social-poster"
-  TAILSCALE_HOST:
-    description: "Your Tailscale hostname (e.g., mymachine.tail-abc123.ts.net)"
+  CALLBACK_HOST:
+    description: >
+      Your OAuth callback base URL. Must be reachable by your browser when you authorize.
+      Examples: Tailscale hostname (mymachine.tail-abc123.ts.net), nginx proxy manager
+      domain (social.example.com), Cloudflare Tunnel, or your VPS public hostname.
+      The path is appended automatically for each platform.
     required: true
-    env_var: TAILSCALE_HOST
+    env_var: CALLBACK_HOST
   # All platform credential variables are documented below in the Environment Variables section
 references:
   - references/platform-setup-guides.md
@@ -166,22 +170,49 @@ This is useful for CI/CD or ephemeral environments:
 | `GITHUB_PAT` | `github.pat` |
 | `GITHUB_REPO` | `github.repo` |
 
-## Cross-Machine OAuth (Tailscale)
+## Cross-Machine OAuth (Reverse Proxy Required)
 
-When the agent is on a remote VPS and the user is on a different machine:
+When the agent is on a remote machine and the user is on a different machine
+(e.g., their desktop "Kratos"), OAuth redirect URLs need to point somewhere
+the user's browser can reach.
+
+**You need a reverse proxy** that makes a local port accessible via HTTPS at a
+URL you can reach from your browser. Options include:
+
+- **Tailscale Serve** — HTTPS on your tailnet, no public internet needed
+- **Cloudflare Tunnel** (`cloudflared`) — public or private tunnels
+- **Nginx Proxy Manager** — if you have a domain pointing to your VPS
+- **ngrok** — quick public URL for testing
+- **Your VPS hostname** — if it already has HTTPS
+
+The URL does NOT need to be public on the internet — it just needs to be
+reachable by YOUR browser.
+
+### Setup (one-time)
 
 ```bash
-# 1. Start the callback server (persistent)
+# 1. Start the callback server (persistent, port 19876)
 python3 ~/.social-poster/oauth-callback-server.py 19876 &
 
-# 2. Expose paths per platform
-tailscale serve --bg --set-path /oauth-callback 19876
-tailscale serve --bg --set-path /integrations/social/linkedin 19876
-tailscale serve --bg --set-path /integrations/social/instagram-standalone 19876
+# 2. Use your reverse proxy to route paths to 127.0.0.1:19876
+#    Example with Tailscale: tailscale serve --bg --set-path /oauth-callback 19876
+#    Example with Cloudflare: cloudflared tunnel --url http://localhost:19876
+#    Example with nginx: proxy_pass http://127.0.0.1:19876 in your site config
+
+# The paths you need depend on which platforms you use:
+# - /oauth-callback                          # For Mastodon, Twitch, Reddit, etc.
+# - /integrations/social/linkedin            # If using LinkedIn
+# - /integrations/social/instagram-standalone # If using Instagram
 ```
 
-The callback server captures OAuth codes from Tailscale HTTPS redirects and saves
-them to `{{SOCIAL_POSTER_DIR}}/last_code.txt`.
+### How the Callback Server Works
+
+The Python HTTP server (`oauth-callback-server.py`) listens on `127.0.0.1:19876`.
+Your reverse proxy forwards HTTPS requests to it. When an OAuth redirect arrives
+with `?code=...`, the server saves the code to `{{SOCIAL_POSTER_DIR}}/last_code.txt`.
+
+The agent then reads the code and exchanges it for tokens. The server stays
+alive between sessions and handles any number of callbacks.
 
 ## Platform Character Limits
 

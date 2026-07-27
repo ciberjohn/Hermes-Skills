@@ -57,7 +57,7 @@ exact URLs, exact labels to click.
 5. Go to **"Auth"** tab
 6. Find **"Authorized Redirect URLs"** — click **"Add"** and paste:
    ```
-   https://{{TAILSCALE_HOST}}/integrations/social/linkedin
+   https://{{CALLBACK_HOST}}/integrations/social/linkedin
    ```
 7. Copy **Client ID** and **Client Secret** from the **"Auth"** tab
 8. Save in `config.json` under `linkedin.client_id` and `linkedin.client_secret`
@@ -106,7 +106,7 @@ python3 social-poster.py store:bluesky
 4. Go to **"Instagram Basic Display" → "Basic Display"** in the sidebar
 5. Under **"Valid OAuth Redirect URIs"**, add:
    ```
-   https://{{TAILSCALE_HOST}}/integrations/social/instagram-standalone
+   https://{{CALLBACK_HOST}}/integrations/social/instagram-standalone
    ```
 6. Go to **"Settings" → "Basic"** and at the top, **toggle the app to Live** (not Development)
 7. Copy **App ID** and **App Secret** from the dashboard
@@ -133,7 +133,7 @@ python3 social-poster.py store:bluesky
 2. Go to **Preferences → Development → New Application**
 3. Fill in:
    - **Application name:** "Social Poster"
-   - **Redirect URI:** `https://{{TAILSCALE_HOST}}/oauth-callback`
+   - **Redirect URI:** `https://{{CALLBACK_HOST}}/oauth-callback`
    - **Scopes:** check `read` and `write`
 4. Click **"Submit"**
 5. Copy **Client Key** (this is your client_id) and **Client Secret**
@@ -160,7 +160,7 @@ python3 social-poster.py store:bluesky
 2. Click **"Register Your Application"**
 3. Fill in:
    - **Name:** anything
-   - **OAuth Redirect URL:** `https://{{TAILSCALE_HOST}}/oauth-callback`
+   - **OAuth Redirect URL:** `https://{{CALLBACK_HOST}}/oauth-callback`
    - **Category:** "Application Integration"
 4. Click **"Create"**
 5. Copy **Client ID**
@@ -187,7 +187,7 @@ python3 social-poster.py store:bluesky
 3. Select **"script"** type
 4. Fill:
    - **Name:** anything
-   - **Redirect URI:** `https://{{TAILSCALE_HOST}}/oauth-callback`
+   - **Redirect URI:** `https://{{CALLBACK_HOST}}/oauth-callback`
 5. Click **"Create App"**
 6. Note: your **client_id** is the small string under the app name (e.g., `abc123def`)
 7. The **client_secret** is the longer string labeled "secret"
@@ -305,7 +305,7 @@ python3 webhook-poster.py github "<pat>" "<repo>" "<title>" "<body>"
 1. Go to **https://developers.facebook.com/**
 2. Create or use a Business app
 3. Add product: **Threads**
-4. Add redirect URI: `https://{{TAILSCALE_HOST}}/oauth-callback`
+4. Add redirect URI: `https://{{CALLBACK_HOST}}/oauth-callback`
 5. Set app to **Live** mode
 6. Save credentials under `threads.app_id` and `threads.app_secret`
 
@@ -319,7 +319,7 @@ python3 webhook-poster.py github "<pat>" "<repo>" "<title>" "<body>"
 1. Go to **https://developers.facebook.com/**
 2. Create a Business app
 3. Add product: **Facebook Login** → configure Pages permissions
-4. Add redirect URI: `https://{{TAILSCALE_HOST}}/oauth-callback`
+4. Add redirect URI: `https://{{CALLBACK_HOST}}/oauth-callback`
 5. Save under `facebook.app_id` and `facebook.app_secret`
 
 ---

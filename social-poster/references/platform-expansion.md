@@ -47,3 +47,12 @@ def post(platform, content):
 ```
 
 OAuth platforms use the same social-poster pattern: generate URL → authenticate → store token → post via API.
+
+## Setup Requirements per Integration Method
+
+| Method | What You Need | Example |
+|--------|-------------|---------|
+| **Webhook** | A URL | Discord channel webhook, Slack app webhook |
+| **Bot token** | Token from platform | Telegram BotFather |
+| **PAT** | Personal Access Token | GitHub settings/tokens |
+| **OAuth + reverse proxy** | Developer app + a URL reachable by your browser | See CALLBACK_HOST in SKILL.md |
