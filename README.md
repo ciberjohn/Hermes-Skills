@@ -75,7 +75,7 @@ If you already know the natural language approach above, stick with it — it as
 
 Copy and paste this to your Hermes agent:
 
-> "Clone github.com/ciberjohn/Hermes-Skills into a local directory. Then copy the SKILL.md from each subdirectory — medium-story, short-videos, excalidraw, ai-projects, t3mp3st-autonomous-security — into my Hermes skills directory under ~/.hermes/skills/ with their category folders (creative/ for medium-story and short-videos, devops/ for excalidraw and ai-projects, security/ for t3mp3st-autonomous-security). If the directories don't exist, create them. Then, for each skill, ask me the configuration questions it needs — repo paths, URLs, persona file locations, and for t3mp3st-autonomous-security also clone T3MP3ST from https://github.com/elder-plinius/T3MP3ST.git, run npm install, configure the .env with my API key, and run npm run doctor to verify. Let me know when everything is installed and show me how to use each one with a slash command example."
+> "Clone github.com/ciberjohn/Hermes-Skills into a local directory. Then copy the SKILL.md from each subdirectory — medium-story, short-videos, excalidraw, ai-projects, t3mp3st-autonomous-security, uk-business-consultant — into my Hermes skills directory under ~/.hermes/skills/ with their category folders (creative/ for medium-story, short-videos, and uk-business-consultant; devops/ for excalidraw and ai-projects; security/ for t3mp3st-autonomous-security). If the directories don't exist, create them. Then, for each skill, ask me the configuration questions it needs — repo paths, URLs, persona file locations, and for t3mp3st-autonomous-security also clone T3MP3ST from https://github.com/elder-plinius/T3MP3ST.git, run npm install, configure the .env with my API key, and run npm run doctor to verify. Let me know when everything is installed and show me how to use each one with a slash command example."
 
 ---
 
@@ -162,6 +162,7 @@ Once a skill is in your `~/.hermes/skills/` directory, Hermes discovers it at st
 | [ai-projects](ai-projects/) | Syncs a Git repository of AI projects to a local directory | Clone → pull → status report | `/ai-projects [action]` |
 | [t3mp3st-autonomous-security](t3mp3st-autonomous-security/) | Autonomous security ops — installs T3MP3ST for recon, scanning, CVE hunting, and kill-chain ops with an LLM-driven AI agent | Setup → verify → configure scope → autonomous hunting → fleet assessment | `/t3mp3st-autonomous-security [target]` |
 | [social-poster](social-poster/) | Direct OAuth social media posting — no Docker, no database. Generate URLs, exchange PINs/codes, store tokens, and post via direct API calls | OAuth → token vault → post → schedule | `"post this to X"` |
+| [uk-business-consultant](uk-business-consultant/) | UK business consultant — two-mode framework for side hustles (£500–£2k/mo) and full-time ventures (£3k–£8k/mo). Includes viability scorecard, financial modelling, UK tax/regs, low-cost marketing playbook | Understand → Scorecard → Model → Recommend → Deliver | `/uk-business-consultant [goal]` |
 
 ---
 
@@ -184,6 +185,7 @@ Hermes-Skills/
 ├── ai-projects/              # Repository sync
 ├── t3mp3st-autonomous-security/ # Autonomous security ops
 ├── social-poster/               # Direct OAuth social media posting
+├── uk-business-consultant/      # UK business consultant skill
 ├── templates/                # Shared templates
 │   └── persona-template.md   # Writing voice template
 └── scripts/                  # Shared scripts
@@ -219,4 +221,17 @@ MIT — use freely, adapt as needed. Attribution appreciated but not required.
 
 Copy and paste:
 
-> "Install the social-poster skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills, copy social-poster/SKILL.md into ~/.hermes/skills/social-media/social-poster/SKILL.md, copy the scripts/ folder into ~/.social-poster/, set chmod 600 on all .json files, pip3 install requests_oauthlib if not already installed, and run python3 ~/.social-poster/social-poster.py vault:status to confirm it works. Then ask me for my TAILSCALE_HOST."
+> \"Install the social-poster skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills, copy social-poster/SKILL.md into ~/.hermes/skills/social-media/social-poster/SKILL.md, copy the scripts/ folder into ~/.social-poster/, set chmod 600 on all .json files, pip3 install requests_oauthlib if not already installed, and run python3 ~/.social-poster/social-poster.py vault:status to confirm it works. Then ask me for my TAILSCALE_HOST.\"
+
+---
+
+### Install uk-business-consultant
+
+Copy and paste:
+
+> \"Install the uk-business-consultant skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills and copy uk-business-consultant/SKILL.md into ~/.hermes/skills/creative/uk-business-consultant/SKILL.md. Also copy uk-business-consultant/.gitignore into the same directory. Then ask me:
+> 1. What email address should business reports be sent from? `{{BUSINESS_CONSULTANT_EMAIL_ADDRESS}}`
+> 2. What is the full path to my email sending script? `{{BUSINESS_CONSULTANT_EMAIL_SCRIPT}}`
+> 3. What is your city/town/region for localised advice? `{{BUSINESS_CONSULTANT_LOCATION}}`
+> 4. What is your local council name? `{{BUSINESS_CONSULTANT_LOCAL_COUNCIL}}`
+> Store my answers, then show me an example: '/uk-business-consultant I need a side hustle idea. I'm good at organising things.' and '/uk-business-consultant I want to leave my job and replace my income of £3,500/month.'\"
