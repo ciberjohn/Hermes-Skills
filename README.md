@@ -229,7 +229,7 @@ Copy and paste:
 
 Copy and paste:
 
-> \"Install the uk-business-consultant skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills and copy uk-business-consultant/SKILL.md into ~/.hermes/skills/creative/uk-business-consultant/SKILL.md. Also copy uk-business-consultant/.gitignore into the same directory. Then ask me:
+> \"Install the uk-business-consultant skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills and copy uk-business-consultant/SKILL.md into ~/.hermes/skills/creative/uk-business-consultant/SKILL.md. Also copy uk-business-consultant/.gitignore into the same directory, the contents of uk-business-consultant/references/ into ~/.hermes/skills/creative/uk-business-consultant/references/, and uk-business-consultant/templates/ into ~/.hermes/skills/creative/uk-business-consultant/templates/. Create the subdirectories if they don't exist. Then ask me:
 > 1. What email address should business reports be sent from? `{{BUSINESS_CONSULTANT_EMAIL_ADDRESS}}`
 > 2. What is the full path to my email sending script? `{{BUSINESS_CONSULTANT_EMAIL_SCRIPT}}`
 > 3. What is your city/town/region for localised advice? `{{BUSINESS_CONSULTANT_LOCATION}}`
