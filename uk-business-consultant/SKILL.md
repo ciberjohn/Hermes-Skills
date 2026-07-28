@@ -86,9 +86,11 @@ Neither? ("I need a business idea" / "What can we do?")
 | **Product-based** (bakery, meal prep, crafts) | £10k–£14k | 40–50% | Higher revenue needed due to material costs |
 | **Hybrid** (product + workshops + events) | £8k–£10k | 55–65% | Balanced approach |
 
+The question is never "can it make money?" — it's **"can it make £5k+ profit per month?"** (meaning: after subtracting all costs, does each sale actually leave you with enough to live on?)
+
 ### The £500 Startup Reality
 - **£500 cannot buy a commercial kitchen or retail lease** — but it can buy equipment, materials, and market stall fees
-- **Service businesses** (VA, admin, consulting) can start for **£0–£50** — the tool is existing skills
+- **Service businesses** (VA, admin, consulting) can start for **£0–£50** (plus ~£80–150/year for public liability insurance)
 - **The first £500 is for validation** — not for full infrastructure
 
 ### Scaling Path
@@ -152,20 +154,24 @@ The question is never "can it make money?" — it's **"can it make £5k+ profit 
 ## UK Business Setup Knowledge
 
 ### Legal Structure
-- **Sole trader** — right choice for starting (£0 setup, minimal admin)
-- **Limited company** — worth considering once profit exceeds ~£50k/year per person
+- **Sole trader** — right choice for starting (£0 setup, minimal admin, can start trading immediately)
+- **Limited company** — worth considering once profit exceeds ~£50k/year per person (lower NI, dividend tax efficiency). Online incorporation costs **£50** at Companies House, plus ongoing filing admin
 - Register with HMRC as self-employed from day 1 of trading
+- For a limited company, you'll need to file annual accounts and confirmation statements — budget ~£500–£1,000/year for an accountant
 
 ### Tax Thresholds (2026/27)
 - Personal allowance: £12,570/year
 - Basic rate (20%): £12,571–£50,270
 - Higher rate (40%): £50,271–£125,140
-- NI Class 4: 9% on profits £12,570–£50,270, 2% above
+- Additional rate (45%): over £125,140
+- NI Class 4: **6%** on profits £12,570–£50,270 (reduced from 9% from April 2026), 2% above
+- NI Class 2: Deemed paid for profits over £7,105 — no payment needed (changed April 2026)
 - VAT threshold: £90,000 turnover — if approaching this, factor 20% VAT into pricing from day 1
+- [Check current rates on gov.uk](https://www.gov.uk/income-tax-rates)
 
 ### The £1,000 Trading Allowance
-- First £1,000 of revenue — tax-free, no HMRC registration needed
-- Relevant for side hustles starting out. Beyond £1k, register as self-employed and claim actual expenses.
+- First £1,000 of revenue — tax-free, no HMRC registration needed (unless you have other reasons to file a return, e.g. child benefit or high-income child benefit charge)
+- Beyond £1k, register as self-employed and claim actual expenses — the allowance and expenses are mutually exclusive, so claiming actual deductions almost always saves more at higher income levels.
 
 ### Banking
 - **Starling Bank** — free business account
@@ -175,8 +181,8 @@ The question is never "can it make money?" — it's **"can it make £5k+ profit 
 
 ### Claimable Expenses
 - Materials, ingredients, packaging
-- Equipment (under £200 as annual investment allowance)
-- Portion of home utilities (simplified expenses: £10–35/week)
+- Equipment (items under £200 can be expensed directly as "revenue items"; larger items qualify for Annual Investment Allowance up to £1 million)
+- Portion of home utilities if you have a dedicated workspace (HMRC flat rate: £6/week for minimal home working; or calculate actual costs for substantial exclusive business use)
 - Public liability insurance
 - Professional certifications
 - Market stall fees / venue hire
@@ -187,7 +193,7 @@ The question is never "can it make money?" — it's **"can it make £5k+ profit 
 ## Business Regulations (UK-Specific)
 
 ### Home-Based Food Business
-- **Register** via register.food.gov.uk at least 28 days before trading — **FREE**
+- **Register** via [GOV.UK food business registration](https://www.gov.uk/guidance/food-business-registration) at least 28 days before trading — registration with your local authority is free of charge
 - **Home kitchens are accepted** — an Environmental Health Officer inspects and may recommend minor changes
 - **Level 2 Food Hygiene certificate** recommended (~£15–25 online)
 - **Allergen labelling** — 14 allergens must be declared on packaging
