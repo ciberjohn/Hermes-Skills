@@ -196,11 +196,16 @@ UK-specific: Price in GBP, consider Apprenticeship Levy, CCS framework
 
 ### Step 5: Repository Assembly
 
-Save everything to the `{{ACADEMY_REPO_NAME}}` repo using this structure:
+Save everything to `{{ACADEMY_REPO_NAME}}` repo using this structure:
 
-```
-{{ACADEMY_REPO_NAME}}/
-├── en/
+[structure stays]
+
+**5a. Update repo README.md** — After saving all course files, update the root `README.md`:
+- Add the new course to the Courses table with level, languages, and status
+- If a business plan exists, add a row to the Business Plans table (or create the table if it's the first course)
+- Commit the README update as part of the same commit
+
+**Course slug naming convention:**
 │   └── {course-slug}/
 │       ├── README.md                  ← Course overview, outcomes, prerequisites
 │       ├── curriculum.md              ← Full curriculum outline
