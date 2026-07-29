@@ -198,38 +198,32 @@ UK-specific: Price in GBP, consider Apprenticeship Levy, CCS framework
 
 Save everything to `{{ACADEMY_REPO_NAME}}` repo using this structure:
 
-[structure stays]
-
-**5a. Update repo README.md** — After saving all course files, update the root `README.md`:
-- Add the new course to the Courses table with level, languages, and status
-- If a business plan exists, add a row to the Business Plans table (or create the table if it's the first course)
-- Commit the README update as part of the same commit
-
-**Course slug naming convention:**
-│   └── {course-slug}/
-│       ├── README.md                  ← Course overview, outcomes, prerequisites
-│       ├── curriculum.md              ← Full curriculum outline
-│       ├── module-01/
-│       │   ├── scripts.md             ← Video scripts
-│       │   ├── lab.md                 ← Lab instructions (3-phase)
-│       │   ├── quiz.md                ← Quiz questions
-│       │   └── slides.md              ← Slide talking points
-│       ├── module-02/
-│       │   └── ...
-│       ├── labs/
-│       │   └── {lab-name}/
-│       │       ├── instructions.md
-│       │       ├── solution.md
-│       │       └── starter/           ← Starter files for the student
-│       ├── assessments/
-│       │   ├── module-quizzes.md
-│       │   └── capstone-project.md
-│       └── b2b-packaging.md           ← B2B pricing and proposal
-├── pt/
-│   └── {course-slug}/
-│       └── (same structure, Portuguese content)
-├── plans/
-│   └── {course-slug}-plan.md          ← Business plan, go-to-market, timeline
+```
+{{ACADEMY_REPO_NAME}}/
+├── {course-slug}/
+│   ├── en/
+│   │   ├── README.md                  ← Course overview, outcomes, prerequisites
+│   │   ├── curriculum.md              ← Full curriculum outline
+│   │   ├── module-01/
+│   │   │   ├── scripts.md             ← Video scripts
+│   │   │   ├── lab.md                 ← Lab instructions (3-phase)
+│   │   │   ├── quiz.md                ← Quiz questions
+│   │   │   └── slides.md              ← Slide talking points
+│   │   ├── module-02/
+│   │   │   └── ...
+│   │   ├── labs/
+│   │   │   ├── overview.md
+│   │   │   └── solutions.md           ← Instructor-only
+│   │   ├── assessments/
+│   │   │   ├── module-quizzes.md
+│   │   │   └── capstone-project.md
+│   │   └── b2b-packaging.md           ← B2B pricing and proposal
+│   ├── pt/
+│   │   └── (same structure as en/, Portuguese content)
+│   └── plans/
+│       ├── curriculum.md              ← Curriculum plan (fact-checked)
+│       └── business-plan.md           ← Go-to-market, pricing strategy
+├── README.md                          ← Root course listing (auto-updated by Step 5a)
 └── templates/                         ← Shared templates (reference)
     ├── module-template.md
     ├── lab-template.md
@@ -237,6 +231,11 @@ Save everything to `{{ACADEMY_REPO_NAME}}` repo using this structure:
     ├── quiz-template.md
     └── slide-template.md
 ```
+
+**5a. Update repo README.md** — After saving all course files, update the root `README.md`:
+- Add the new course to the Courses table with level, languages, and status
+- If a business plan exists, add a row to the Business Plans table (or create the table if it's the first course)
+- Commit the README update as part of the same commit
 
 **Course slug naming convention:** lowercase, hyphens, descriptive. Examples:
 - `linux-command-line-security`
