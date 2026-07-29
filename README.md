@@ -163,7 +163,8 @@ Once a skill is in your `~/.hermes/skills/` directory, Hermes discovers it at st
 | [t3mp3st-autonomous-security](t3mp3st-autonomous-security/) | Autonomous security ops — installs T3MP3ST for recon, scanning, CVE hunting, and kill-chain ops with an LLM-driven AI agent | Setup → verify → configure scope → autonomous hunting → fleet assessment | `/t3mp3st-autonomous-security [target]` |
 | [social-poster](social-poster/) | Direct OAuth social media posting — no Docker, no database. Generate URLs, exchange PINs/codes, store tokens, and post via direct API calls | OAuth → token vault → post → schedule | `"post this to X"` |
 | [uk-business-consultant](uk-business-consultant/) | UK business consultant — two-mode framework for side hustles (£500–£2k/mo) and full-time ventures (£3k–£8k/mo). Includes viability scorecard, financial modelling, UK tax/regs, low-cost marketing playbook | Understand → Scorecard → Model → Recommend → Deliver | `/uk-business-consultant [goal]` |
-
+| [technical-trainer](technical-trainer/) | Full lifecycle technical course creation — AI and Linux courses in English (UK) and Portuguese (PT). Market research, fact-checked content, bilingual production, and B2B packaging via parallel sub-agents | 6 steps: Intake → Market Research → Curriculum Design → 4 parallel sub-agents (Fact Checker, Technical Writer, Translator, B2B Specialist) → Repository Assembly → Delivery | `\"Create a course on [topic]\"` |
+|
 ---
 
 ## The Pattern
@@ -185,6 +186,7 @@ Hermes-Skills/
 ├── ai-projects/              # Repository sync
 ├── t3mp3st-autonomous-security/ # Autonomous security ops
 ├── social-poster/               # Direct OAuth social media posting
+├── technical-trainer/           # Course creation pipeline
 ├── uk-business-consultant/      # UK business consultant skill
 ├── templates/                # Shared templates
 │   └── persona-template.md   # Writing voice template
@@ -235,3 +237,16 @@ Copy and paste:
 > 3. What is your city/town/region for localised advice? `{{BUSINESS_CONSULTANT_LOCATION}}`
 > 4. What is your local council name? `{{BUSINESS_CONSULTANT_LOCAL_COUNCIL}}`
 > Store my answers, then show me an example: '/uk-business-consultant I need a side hustle idea. I'm good at organising things.' and '/uk-business-consultant I want to leave my job and replace my income of £3,500/month.'\"
+
+---
+
+### Install technical-trainer
+
+Copy and paste:
+
+> "Install the technical-trainer skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills and copy technical-trainer/SKILL.md into ~/.hermes/skills/creative/technical-trainer/SKILL.md. Also copy technical-trainer/.gitignore into the same directory, the contents of technical-trainer/references/ into ~/.hermes/skills/creative/technical-trainer/references/, and technical-trainer/templates/ into ~/.hermes/skills/creative/technical-trainer/templates/. Create the subdirectories if they don't exist. Then ask me:
+> 1. What is the absolute path to my academy course repository? `{{ACADEMY_REPO_PATH}}`
+> 2. What is my academy repository name? `{{ACADEMY_REPO_NAME}}`
+> 3. What GitHub username should be used in README examples? `{{GITHUB_USERNAME}}`
+> 4. What author name should appear in skill metadata? `{{AUTHOR_NAME}}`
+> Store my answers, then show me how to invoke it: 'Create a course on Linux command line for security analysts, beginner level, for both B2C and B2B.'"

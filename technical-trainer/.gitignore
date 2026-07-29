@@ -1,0 +1,19 @@
+# Environment and secrets
+.env
+.env.*
+secrets/
+!env.example
+
+# Course output (user's repo is separate)
+../academy-repo-name/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
