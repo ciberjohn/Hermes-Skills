@@ -59,7 +59,7 @@ Creates new Hermes Agent skills from a description.
    additional issues in files you already touched.
 
    **IMPORTANT:** After applying fixes, do ONE final grep for stale references before committing:
-   `grep -rn "TAILSCALE\|YOUR_TAIL\|old-hostname\|ciberjohn\|harmoniaeu\|lealdasilva\|dclawdius" <skill-dir>/ --include="*.md" --include="*.py"`
+   `grep -rn "TAILSCALE\|YOUR_HOSTNAME\|old-hostname\|your_user\|youruser\|your_domain" <skill-dir>/ --include="*.md" --include="*.py"`
 
 ### Existing Skill Pattern (publishing a local skill to the Hermes-Skills repo)
 
@@ -132,7 +132,7 @@ Use this when you already have a skill installed in `~/.hermes/skills/` and need
 
 9. **Sanity-check** — grep the entire new directory for leaked secrets (including `youruser` pattern):
    ```bash
-   grep -rn "TAILSCALE\|YOUR_TAIL\|old-hostname\|ciberjohn\|harmoniaeu\|lealdasilva\|dclawdius\|your_user\|youruser" "$HERMES_SKILLS_REPO_PATH/<public-name>/" --include="*.md" --include="*.py" --include="*.sh"
+   grep -rn "TAILSCALE\|YOUR_HOSTNAME\|old-hostname\|your_user\|youruser\|your_domain" "$HERMES_SKILLS_REPO_PATH/<public-name>/" --include="*.md" --include="*.py" --include="*.sh"
    ```
    Fix any matches.
 

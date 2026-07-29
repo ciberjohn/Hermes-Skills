@@ -2,7 +2,7 @@
 name: t3mp3st-autonomous-security
 description: "Autonomous security operations — install T3MP3ST, automate recon, scanning, CVE hunting, and kill-chain ops with an AI agent. Covers cloning, system setup, MCP integration, daily recon, and watchdog fleet assessment."
 license: MIT
-author: ciberjohn
+author: {{AUTHOR_NAME}}
 metadata:
   version: "1.0.0"
   tags: [security, red-team, recon, scanning, automation, t3mp3st, autonomous, cve, vulnerability, kill-chain, mcp]
