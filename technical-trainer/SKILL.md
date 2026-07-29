@@ -1,6 +1,6 @@
 ---
 name: technical-trainer
-description: "Full lifecycle technical course creation — AI and Linux courses in English (UK) and Portuguese (PT). Orchestrates market research, fact-checking, technical writing, and bilingual translation via parallel sub-agents. Produces curriculum plans, video scripts, lab exercises, assessments, and B2B pricing packages — all saved to a GitHub repository."
+description: "Full lifecycle technical course creation — AI and Linux courses in English (UK), European Portuguese (PT), and Brazilian Portuguese (BR). Orchestrates market research, fact-checking, technical writing, and trilingual translation via parallel sub-agents. Produces curriculum plans, video scripts, lab exercises, assessments, and B2B pricing packages — all saved to a GitHub repository."
 version: 1.0.0
 author: {{AUTHOR_NAME}}
 license: MIT
