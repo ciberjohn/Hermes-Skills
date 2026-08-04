@@ -2,6 +2,28 @@
 
 Generate full Medium article packages from a single topic prompt: article in markdown, 90-second HeyGen video script, LinkedIn post, YouTube screencast script, fact-check report, and HTML versions ready for publishing.
 
+## Quick Install
+
+Copy and paste this to your Hermes agent (any profile):
+
+```text
+Install the medium-story skill into my Hermes agent. Clone
+github.com/ciberjohn/Hermes-Skills to a temporary directory and copy
+medium-story/SKILL.md into ~/.hermes/skills/creative/medium-story/SKILL.md.
+If creative/ doesn't exist, create it. Then copy the contents of
+medium-story/references/ into ~/.hermes/skills/creative/medium-story/references/.
+After that, ask me these configuration questions one at a time:
+1. Where is my Medium articles repository on disk? (absolute path)
+2. What is the GitHub remote URL for that repository?
+3. Where is my writing persona file?
+4. Where is my md_to_html.py script located?
+5. What Medium RSS feed URL should I cache (optional)?
+6. What byline name should articles use?
+When I answer each, store the values so the skill works next time I use it.
+Finally, show me an example of how to invoke it: '/medium-story write an
+article about why SSH key management still fails in 2026'.
+```
+
 ## Prerequisites
 
 - **Hermes Agent** — installed and configured (`pip install hermes-agent` or via [Nous Research](https://hermes-agent.nousresearch.com))

@@ -11,6 +11,19 @@ synchronised with its upstream Git remote.
 - Reports the current branch, latest commit, and working-tree status after
   every sync.
 
+## Quick Install
+
+Copy and paste this to your Hermes agent (any profile):
+
+```text
+Install the ai-projects skill into my Hermes agent. Clone
+github.com/ciberjohn/Hermes-Skills and copy ai-projects/SKILL.md into
+~/.hermes/skills/devops/ai-projects/SKILL.md. Then ask me:
+1. What is the GitHub URL of my AI projects repository?
+2. Where should I clone it on disk?
+Store my answers, then show me an example: '/ai-projects sync the latest projects'.
+```
+
 ## Prerequisites
 
 - [Hermes Agent](https://hermes-agent.nousresearch.com) — the skill engine.

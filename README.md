@@ -6,28 +6,28 @@ A growing collection of reusable Hermes Agent skills, built to be installed, ext
 
 ---
 
-## How Installation Works
+## Installation
 
 Every skill in this repo is designed to be installed the way you would tell a colleague what to do: in natural language.
 
-Copy one of the prompts below, paste it to your Hermes agent, and it handles the rest — cloning the repo, placing the files in `~/.hermes/skills/`, and asking you the configuration questions it needs.
+Each skill lives in its own folder with a README containing a **copy-paste install prompt**. Send that prompt to your Hermes agent and it handles the rest — cloning the repo, placing the files in `~/.hermes/skills/`, and asking you the configuration questions it needs.
 
 Once installed, the skill is available as a slash command (`/medium-story`, `/short-videos`, `/excalidraw`, `/ai-projects`) — or you can invoke it naturally by describing what you want.
 
----
+### Current Skills
 
-### Install skill-writer
-
-Copy and paste:
-
-> "Install the skill-writer meta-skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills and copy skill-writer/SKILL.md into ~/.hermes/skills/meta/skill-writer/SKILL.md. Also copy skill-writer/.gitignore into the same directory. Then ask me:
-> 1. Where is my Hermes-Skills repository on disk?
-> 2. What is the GitHub URL for the Hermes-Skills repo?
-> 3. What name should I use for attribution in new skills?
-> 4. Should peer review be enabled for new skills?
-> Store my answers, then show me an example: '/skill-writer I need a skill that monitors disk usage and posts alerts to Discord when volumes exceed 90%.'."
-
----
+| Skill | What it does | Pipeline | Slash command |
+|-------|-------------|----------|---------------|
+| [skill-writer](skill-writer/) | Meta-skill: creates new Hermes Agent skills from a description. Generates SKILL.md, README.md, .gitignore, templates, and runs peer review | 8 steps: intake → research → generate → create supporting → sanitize → review → commit | `/skill-writer [description]` |
+| [medium-story](medium-story/) | Produces a full article package (markdown, video script, LinkedIn post, YouTube script, HTML) from a single topic prompt | 9 steps: sync → cross-ref → research → write → 4 parallel output agents → HTML → git | `/medium-story [topic]` |
+| [short-videos](short-videos/) | Generates 90-second video scripts and standalone LinkedIn posts | 6 steps: sync → research → 3 parallel agents → git | `/short-videos [topic]` |
+| [excalidraw](excalidraw/) | Creates Excalidraw diagrams as JSON files, saved to a GitHub repo | Python helpers → JSON generation → git push | `/excalidraw [description]` |
+| [ai-projects](ai-projects/) | Syncs a Git repository of AI projects to a local directory | Clone → pull → status report | `/ai-projects [action]` |
+| [t3mp3st-autonomous-security](t3mp3st-autonomous-security/) | Autonomous security ops — installs T3MP3ST for recon, scanning, CVE hunting, and kill-chain ops with an LLM-driven AI agent | Setup → verify → configure scope → autonomous hunting → fleet assessment | `/t3mp3st-autonomous-security [target]` |
+| [social-poster](social-poster/) | Direct OAuth social media posting — no Docker, no database. Generate URLs, exchange PINs/codes, store tokens, and post via direct API calls | OAuth → token vault → post → schedule | `"post this to X"` |
+| [uk-business-consultant](uk-business-consultant/) | UK business consultant — two-mode framework for side hustles (£500–£2k/mo) and full-time ventures (£3k–£8k/mo). Includes viability scorecard, financial modelling, UK tax/regs, low-cost marketing playbook | Understand → Scorecard → Model → Recommend → Deliver | `/uk-business-consultant [goal]` |
+| [technical-trainer](technical-trainer/) | Full lifecycle technical course creation — AI and Linux courses in English (UK) and Portuguese (PT). Market research, fact-checked content, bilingual production, and B2B packaging via parallel sub-agents | 6 steps: Intake → Market Research → Curriculum Design → 4 parallel sub-agents (Fact Checker, Technical Writer, Translator, B2B Specialist) → Repository Assembly → Delivery | `"Create a course on [topic]"` |
+| [transcribe](transcribe/) | Local speech-to-text: transcribe audio (Dropbox links, uploads, URLs) with CrisperWhisper and commit verbatim + intended transcripts to a private GitHub repo — one dated folder per audio | Fetch → transcribe (verbatim + intended) → dated folder → git commit + push | `"transcribe this Dropbox link"` |
 
 ### Alternative: Install via Skills Hub CLI (Advanced)
 
@@ -55,8 +55,6 @@ hermes skills search pipeline
 
 Taps add the entire repo as an external skill directory. Skills update automatically when you update the repo.
 
----
-
 ### Natural Language Auto-Discovery
 
 You can also install a skill simply by telling your Hermes agent what you want:
@@ -66,80 +64,6 @@ You can also install a skill simply by telling your Hermes agent what you want:
 If the `medium-story` skill is installed, Hermes automatically matches your goal to the skill's description, loads the full instructions, and runs the pipeline. No slash command needed.
 
 The same applies to every installed skill. The skill descriptions at the top of each `SKILL.md` file are what Hermes uses for discovery, so the more descriptive they are, the better the agent picks the right one.
-
-If you already know the natural language approach above, stick with it — it asks you the configuration questions rather than requiring you to hunt down variables.
-
----
-
-### Quick Install — All Skills
-
-Copy and paste this to your Hermes agent:
-
-> "Clone github.com/ciberjohn/Hermes-Skills into a local directory. Then copy the SKILL.md from each subdirectory — medium-story, short-videos, excalidraw, ai-projects, t3mp3st-autonomous-security, uk-business-consultant — into my Hermes skills directory under ~/.hermes/skills/ with their category folders (creative/ for medium-story, short-videos, and uk-business-consultant; devops/ for excalidraw and ai-projects; security/ for t3mp3st-autonomous-security). If the directories don't exist, create them. Then, for each skill, ask me the configuration questions it needs — repo paths, URLs, persona file locations, and for t3mp3st-autonomous-security also clone T3MP3ST from https://github.com/elder-plinius/T3MP3ST.git, run npm install, configure the .env with my API key, and run npm run doctor to verify. Let me know when everything is installed and show me how to use each one with a slash command example."
-
----
-
-### Install medium-story
-
-Copy and paste:
-
-> "Install the medium-story skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills to a temporary directory and copy medium-story/SKILL.md into ~/.hermes/skills/creative/medium-story/SKILL.md. If creative/ doesn't exist, create it. Then copy the contents of medium-story/references/ into ~/.hermes/skills/creative/medium-story/references/. After that, ask me these configuration questions one at a time:
-> 1. Where is my Medium articles repository on disk? (absolute path)
-> 2. What is the GitHub remote URL for that repository?
-> 3. Where is my writing persona file?
-> 4. Where is my md_to_html.py script located?
-> 5. What Medium RSS feed URL should I cache (optional)?
-> 6. What byline name should articles use?
-> When I answer each, store the values so the skill works next time I use it. Finally, show me an example of how to invoke it: '/medium-story write an article about why SSH key management still fails in 2026'."
-
----
-
-### Install short-videos
-
-Copy and paste:
-
-> "Install the short-videos skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills and copy short-videos/SKILL.md into ~/.hermes/skills/creative/short-videos/SKILL.md. Then ask me:
-> 1. Where is my content repository on disk?
-> 2. Where should short video folders be created inside that repo?
-> Store my answers, then show me an example: '/short-videos create a video about zero-trust networking for remote Kubernetes clusters'."
-
----
-
-### Install excalidraw
-
-Copy and paste:
-
-> "Install the excalidraw skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills and copy excalidraw/SKILL.md into ~/.hermes/skills/devops/excalidraw/SKILL.md. Also copy excalidraw/python_helpers.py into a location I specify. Then ask me:
-> 1. Where is my excalidraw diagrams repository on disk?
-> 2. What is the GitHub URL for that repository?
-> 3. Where should I put python_helpers.py?
-> 4. What is the URL of my self-hosted Excalidraw instance (optional)?
-> Store my answers, then show me an example: '/excalidraw generate a pipeline architecture diagram for the CI/CD flow'."
-
----
-
-### Install ai-projects
-
-Copy and paste:
-
-> "Install the ai-projects skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills and copy ai-projects/SKILL.md into ~/.hermes/skills/devops/ai-projects/SKILL.md. Then ask me:
-> 1. What is the GitHub URL of my AI projects repository?
-> 2. Where should I clone it on disk?
-> Store my answers, then show me an example: '/ai-projects sync the latest projects'."
-
----
-
-### Install t3mp3st-autonomous-security (with T3MP3ST)
-
-Copy and paste **one prompt** — your Hermes agent will do the rest:
-
-> "Install the t3mp3st-autonomous-security skill from github.com/ciberjohn/Hermes-Skills into ~/.hermes/skills/security/t3mp3st-autonomous-security/SKILL.md. First, clone T3MP3ST from https://github.com/elder-plinius/T3MP3ST.git into a directory I specify, run npm install in it, and verify it installed correctly. Then ask me these questions one at a time:
-> 1. Where should T3MP3ST be installed? `{{T3MP3ST_PATH}}` (default ~/t3mp3st)
-> 2. What port should the MCP server use? `{{T3MP3ST_PORT}}` (default 3333)
-> 3. What comma-separated targets should be in my daily recon scope? `{{SCOPE_TARGETS}}` (default: 127.0.0.1)
-> 4. What hosts should the fleet assessment scan? `{{FLEET_HOSTS}}` (space-separated hostnames or IPs, optional)
-> 5. Do you have an OpenRouter API key for T3MP3ST's internal AI? `{{OPENROUTER_API_KEY}}` (optional — leave blank to use Hermes's existing model instead)
-> When I answer each, create the `.env` file with all the env vars — write the API key if provided, leave it empty otherwise — set permissions to `chmod 600`, run `npm run doctor` to confirm everything is working, show me the doctor output, then tell me the skill is ready and show me an example: '/t3mp3st-autonomous-security run a quick recon against my local targets'."
 
 ---
 
@@ -151,20 +75,6 @@ Once a skill is in your `~/.hermes/skills/` directory, Hermes discovers it at st
 
 **You never manage sessions, approve permission prompts, or restart stalled processes.** The agent handles everything.
 
-### Current Skills
-
-| Skill | What it does | Pipeline | Slash command |
-|-------|-------------|----------|---------------|
-| [skill-writer](skill-writer/) | Meta-skill: creates new Hermes Agent skills from a description. Generates SKILL.md, README.md, .gitignore, templates, and runs peer review | 8 steps: intake → research → generate → create supporting → sanitize → review → commit | `/skill-writer [description]` |
-| [medium-story](medium-story/) | Produces a full article package (markdown, video script, LinkedIn post, YouTube script, HTML) from a single topic prompt | 9 steps: sync → cross-ref → research → write → 4 parallel output agents → HTML → git | `/medium-story [topic]` |
-| [short-videos](short-videos/) | Generates 90-second video scripts and standalone LinkedIn posts | 6 steps: sync → research → 3 parallel agents → git | `/short-videos [topic]` |
-| [excalidraw](excalidraw/) | Creates Excalidraw diagrams as JSON files, saved to a GitHub repo | Python helpers → JSON generation → git push | `/excalidraw [description]` |
-| [ai-projects](ai-projects/) | Syncs a Git repository of AI projects to a local directory | Clone → pull → status report | `/ai-projects [action]` |
-| [t3mp3st-autonomous-security](t3mp3st-autonomous-security/) | Autonomous security ops — installs T3MP3ST for recon, scanning, CVE hunting, and kill-chain ops with an LLM-driven AI agent | Setup → verify → configure scope → autonomous hunting → fleet assessment | `/t3mp3st-autonomous-security [target]` |
-| [social-poster](social-poster/) | Direct OAuth social media posting — no Docker, no database. Generate URLs, exchange PINs/codes, store tokens, and post via direct API calls | OAuth → token vault → post → schedule | `"post this to X"` |
-| [uk-business-consultant](uk-business-consultant/) | UK business consultant — two-mode framework for side hustles (£500–£2k/mo) and full-time ventures (£3k–£8k/mo). Includes viability scorecard, financial modelling, UK tax/regs, low-cost marketing playbook | Understand → Scorecard → Model → Recommend → Deliver | `/uk-business-consultant [goal]` |
-| [technical-trainer](technical-trainer/) | Full lifecycle technical course creation — AI and Linux courses in English (UK) and Portuguese (PT). Market research, fact-checked content, bilingual production, and B2B packaging via parallel sub-agents | 6 steps: Intake → Market Research → Curriculum Design → 4 parallel sub-agents (Fact Checker, Technical Writer, Translator, B2B Specialist) → Repository Assembly → Delivery | `\"Create a course on [topic]\"` |
-|
 ---
 
 ## The Pattern
@@ -187,6 +97,7 @@ Hermes-Skills/
 ├── t3mp3st-autonomous-security/ # Autonomous security ops
 ├── social-poster/               # Direct OAuth social media posting
 ├── technical-trainer/           # Course creation pipeline
+├── transcribe/                  # Local audio transcription pipeline
 ├── uk-business-consultant/      # UK business consultant skill
 ├── templates/                # Shared templates
 │   └── persona-template.md   # Writing voice template
@@ -202,51 +113,6 @@ This is a living collection. Planned additions include security scanning pipelin
 
 ---
 
-## Security
-
-All skills are sanitised for public use:
-
-- ✅ No secrets, tokens, or credentials
-- ✅ No system paths — all configurable through `{{VARIABLE}}` placeholders
-- ✅ No hostnames, IP addresses, or internal infrastructure details
-- ✅ Environment variables recommended for sensitive configuration
-
-Review each skill's config variables before first use. Never hardcode credentials.
-
----
-
 ## License
 
 MIT — use freely, adapt as needed. Attribution appreciated but not required.
-
-### Install social-poster
-
-Copy and paste:
-
-> \"Install the social-poster skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills, copy social-poster/SKILL.md into ~/.hermes/skills/social-media/social-poster/SKILL.md, copy the scripts/ folder into ~/.social-poster/, set chmod 600 on all .json files, pip3 install requests_oauthlib if not already installed, and run python3 ~/.social-poster/social-poster.py vault:status to confirm it works. Then ask me for my TAILSCALE_HOST.\"
-
----
-
-### Install uk-business-consultant
-
-Copy and paste:
-
-> \"Install the uk-business-consultant skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills and copy uk-business-consultant/SKILL.md into ~/.hermes/skills/creative/uk-business-consultant/SKILL.md. Also copy uk-business-consultant/.gitignore into the same directory, the contents of uk-business-consultant/references/ into ~/.hermes/skills/creative/uk-business-consultant/references/, and uk-business-consultant/templates/ into ~/.hermes/skills/creative/uk-business-consultant/templates/. Create the subdirectories if they don't exist. Then ask me:
-> 1. What email address should business reports be sent from? `{{BUSINESS_CONSULTANT_EMAIL_ADDRESS}}`
-> 2. What is the full path to my email sending script? `{{BUSINESS_CONSULTANT_EMAIL_SCRIPT}}`
-> 3. What is your city/town/region for localised advice? `{{BUSINESS_CONSULTANT_LOCATION}}`
-> 4. What is your local council name? `{{BUSINESS_CONSULTANT_LOCAL_COUNCIL}}`
-> Store my answers, then show me an example: '/uk-business-consultant I need a side hustle idea. I'm good at organising things.' and '/uk-business-consultant I want to leave my job and replace my income of £3,500/month.'\"
-
----
-
-### Install technical-trainer
-
-Copy and paste:
-
-> "Install the technical-trainer skill into my Hermes agent. Clone github.com/ciberjohn/Hermes-Skills and copy technical-trainer/SKILL.md into ~/.hermes/skills/creative/technical-trainer/SKILL.md. Also copy technical-trainer/.gitignore into the same directory, the contents of technical-trainer/references/ into ~/.hermes/skills/creative/technical-trainer/references/, and technical-trainer/templates/ into ~/.hermes/skills/creative/technical-trainer/templates/. Create the subdirectories if they don't exist. Then ask me:
-> 1. What is the absolute path to my academy course repository? `{{ACADEMY_REPO_PATH}}`
-> 2. What is my academy repository name? `{{ACADEMY_REPO_NAME}}`
-> 3. What GitHub username should be used in README examples? `{{GITHUB_USERNAME}}`
-> 4. What author name should appear in skill metadata? `{{AUTHOR_NAME}}`
-> Store my answers, then show me how to invoke it: 'Create a course on Linux command line for security analysts, beginner level, for both B2C and B2B.'"

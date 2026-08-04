@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Secrets
+.env
+.env.*
+secrets/
+credentials/
+
+# Local audio downloads
+*.mp3
+*.wav
+*.m4a
+*.ogg
+*.flac
+
+# OS
+.DS_Store
+Thumbs.db

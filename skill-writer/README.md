@@ -4,6 +4,23 @@ Creates new Hermes Agent skills from a description. Given a topic and concept, g
 
 This is a **meta-skill**: it encodes the process I used to build every other skill in this repo. If you can describe what a skill should do, the skill-writer handles the rest.
 
+## Quick Install
+
+Copy and paste this to your Hermes agent (any profile):
+
+```text
+Install the skill-writer meta-skill into my Hermes agent. Clone
+github.com/ciberjohn/Hermes-Skills and copy skill-writer/SKILL.md into
+~/.hermes/skills/meta/skill-writer/SKILL.md. Also copy
+skill-writer/.gitignore into the same directory. Then ask me:
+1. Where is my Hermes-Skills repository on disk?
+2. What is the GitHub URL for the Hermes-Skills repo?
+3. What name should I use for attribution in new skills?
+4. Should peer review be enabled for new skills?
+Store my answers, then show me an example: '/skill-writer I need a skill
+that monitors disk usage and posts alerts to Discord when volumes exceed 90%.'
+```
+
 ## Prerequisites
 
 - **Hermes Agent** — with `delegate_task` capability

@@ -9,6 +9,23 @@ Generate Excalidraw diagrams directly from Hermes Agent — no Claude Code MCP, 
 - Saves diagram files to a GitHub repo with automatic commit and push
 - Supports a self-hosted Excalidraw instance or `https://excalidraw.com` for viewing and editing
 
+## Quick Install
+
+Copy and paste this to your Hermes agent (any profile):
+
+```text
+Install the excalidraw skill into my Hermes agent. Clone
+github.com/ciberjohn/Hermes-Skills and copy excalidraw/SKILL.md into
+~/.hermes/skills/devops/excalidraw/SKILL.md. Also copy
+excalidraw/python_helpers.py into a location I specify. Then ask me:
+1. Where is my excalidraw diagrams repository on disk?
+2. What is the GitHub URL for that repository?
+3. Where should I put python_helpers.py?
+4. What is the URL of my self-hosted Excalidraw instance (optional)?
+Store my answers, then show me an example: '/excalidraw generate a pipeline
+architecture diagram for the CI/CD flow'.
+```
+
 ## Prerequisites
 
 | Requirement | Notes |

@@ -12,6 +12,20 @@ Given a topic, this skill produces three deliverables in a single pipeline run:
 
 All outputs are British English, practitioner-voiced, and platform-neutral.
 
+## Quick Install
+
+Copy and paste this to your Hermes agent (any profile):
+
+```text
+Install the short-videos skill into my Hermes agent. Clone
+github.com/ciberjohn/Hermes-Skills and copy short-videos/SKILL.md into
+~/.hermes/skills/creative/short-videos/SKILL.md. Then ask me:
+1. Where is my content repository on disk?
+2. Where should short video folders be created inside that repo?
+Store my answers, then show me an example: '/short-videos create a video
+about zero-trust networking for remote Kubernetes clusters'.
+```
+
 ## Prerequisites
 
 - **Hermes Agent** — installed and configured on a Linux system
