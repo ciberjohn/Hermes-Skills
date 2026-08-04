@@ -87,7 +87,7 @@ The skill-writer asks you questions, generates all files, runs a peer review, an
 7. **3-reviewer verification** — DevOps (ops), SecOps (security), AI Engineer (quality) — in parallel
 8. **Validate** — optional `skills-ref validate` check
 9. **Git commit** — adds new skill directory
-10. **Root README update** — adds to skills table, install prompts, directory tree, slash commands
+10. **Root README + GitHub About update** — adds to skills table and directory tree, refreshes the repo's About description via `gh repo edit --description`. Install prompts stay in each skill's own README (never in the root README).
 11. **Report** — shows result, review summary, and install instructions
 
 ## Examples

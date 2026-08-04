@@ -54,12 +54,19 @@ Creates new Hermes Agent skills from a description.
 
 8. **Apply fixes from ALL reviews in one batch** — wait for ALL sub-agents to complete before
    starting any fix. Fix every finding (CRITICAL/HIGH/MEDIUM first, then LOW/COSMETIC),
-   re-run syntax checks on all scripts, then git commit and push once. Do NOT commit between
+   re-run syntax checks on all scripts, then update the root README and GitHub About description
+   (Step 9) and commit and push once. Do NOT commit between
    reviews — this would create unnecessary git history noise if a later review finds
    additional issues in files you already touched.
 
    **IMPORTANT:** After applying fixes, do ONE final grep for stale references before committing:
    `grep -rn "TAILSCALE\|YOUR_HOSTNAME\|old-hostname\|your_user\|youruser\|your_domain" <skill-dir>/ --include="*.md" --include="*.py"`
+
+9. **Update root README and GitHub About description** — before committing, bring the public repo metadata in sync:
+    - **Table row**: Add a row to the "Current Skills" table in the root README (name, description, pipeline summary, slash command)
+    - **Directory tree**: Add the new skill to the repo structure tree diagram
+    - **GitHub About description**: Run `gh repo edit --description "<updated skill list>"` so the repo's About box reflects the current collection. It is the text shown on the repo's landing page and goes stale easily — update it every time a skill is added.
+    - **Do NOT** add an "### Install <public-name>" section to the root README — the install prompt lives in the skill's own README.md (step 4). The root README is a human-facing index; keeping prompts out of it prevents duplication.
 
 ### Existing Skill Pattern (publishing a local skill to the Hermes-Skills repo)
 
@@ -136,10 +143,11 @@ Use this when you already have a skill installed in `~/.hermes/skills/` and need
    ```
    Fix any matches.
 
-10. **Update root README** — three changes required:
-    - **Table row**: Add a row to the "Current Skills" table with name, description, pipeline summary, and slash command
-    - **Install prompt section**: Add a full "### Install <public-name>" section with the copy-paste install prompt (same as step 7's NL prompt — but as a standalone section in root README, matching the pattern of other skills)
+10. **Update root README and GitHub About description** — required before the final commit:
+    - **Table row**: Add a row to the "Current Skills" table in the root README with name, description, pipeline summary, and slash command
     - **Directory tree**: Add the new skill to the repo structure tree diagram
+    - **GitHub About description**: Keep the repo's About box in sync by running `gh repo edit --description "<updated skill list>"`. List the current skill set (or a summary of it) so the About description never goes stale — it is the text shown on the repo's landing page.
+    - **Do NOT** add an "### Install <public-name>" section to the root README — the install prompt lives in the skill's own README.md (step 7). The root README is a human-facing index; keeping prompts out of it prevents the duplication that previously accumulated there.
 
 11. **Peer review (mandatory)** — dispatch ALL THREE mandatory sub-agents: DevSecOps, QA/Consistency, and Technical Writer. Each gets context tailored to their role (see Pipeline Step 7 above for exact prompts). Do NOT skip the Technical Writer — their live source verification catches factual errors that no other reviewer will find. Each reviewer must verify:
     - The sanitised linked files, not just SKILL.md
