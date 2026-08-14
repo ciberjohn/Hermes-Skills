@@ -1,6 +1,6 @@
 # medium-story — Hermes Agent Skill
 
-Generate full Medium article packages from a single topic prompt: article in markdown, 90-second HeyGen video script, LinkedIn post, YouTube screencast script, fact-check report, and HTML versions ready for publishing.
+Generate full Medium article packages from a single topic prompt: article in markdown, 90-second HeyGen video script, LinkedIn post, YouTube screencast script, fact-check report, and HTML versions ready for publishing. Includes a mandatory anti-AI-slop writing pass (Step 6b) that verifies the draft against banned vocabulary and structural tells before the output agents run.
 
 ## Quick Install
 

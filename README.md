@@ -19,7 +19,8 @@ Once installed, the skill is available as a slash command (`/medium-story`, `/sh
 | Skill | What it does | Pipeline | Slash command |
 |-------|-------------|----------|---------------|
 | [skill-writer](skill-writer/) | Meta-skill: creates new Hermes Agent skills from a description. Generates SKILL.md, README.md, .gitignore, templates, and runs peer review | 8 steps: intake → research → generate → create supporting → sanitize → review → commit | `/skill-writer [description]` |
-| [medium-story](medium-story/) | Produces a full article package (markdown, video script, LinkedIn post, YouTube script, HTML) from a single topic prompt | 9 steps: sync → cross-ref → research → write → 4 parallel output agents → HTML → git | `/medium-story [topic]` |
+| [medium-story](medium-story/) | Produces a full article package (markdown, video script, LinkedIn post, YouTube script, HTML) from a single topic prompt. Includes a mandatory anti-AI-slop writing pass (Step 6b) before the output agents run | 9 steps: sync → cross-ref → research → write → anti-slop pass → 4 parallel output agents → HTML → git | `/medium-story [topic]` |
+| [ciberjohn-no-slop](ciberjohn-no-slop/) | General-purpose writing constraints that make output sound human, not AI-generated. Banned vocabulary, structural rules, punctuation discipline, accuracy rules, plus a verification script | Enforce → self-check → run `no_slop_check.py` → ship | `/ciberjohn-no-slop` |
 | [short-videos](short-videos/) | Generates 90-second video scripts and standalone LinkedIn posts | 6 steps: sync → research → 3 parallel agents → git | `/short-videos [topic]` |
 | [excalidraw](excalidraw/) | Creates Excalidraw diagrams as JSON files, saved to a GitHub repo | Python helpers → JSON generation → git push | `/excalidraw [description]` |
 | [ai-projects](ai-projects/) | Syncs a Git repository of AI projects to a local directory | Clone → pull → status report | `/ai-projects [action]` |
@@ -91,6 +92,7 @@ The key insight is that the skill system lets you package operational knowledge 
 Hermes-Skills/
 ├── skill-writer/             # Meta-skill: creates new skills
 ├── medium-story/             # Medium article pipeline
+├── ciberjohn-no-slop/        # Anti-AI-slop writing constraints + checker
 ├── short-videos/             # Short video pipeline
 ├── excalidraw/               # Diagram generation
 ├── ai-projects/              # Repository sync

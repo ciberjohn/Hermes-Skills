@@ -1,0 +1,17 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment and secrets
+.env
+*.env
+secrets/
+credentials/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local Hermes skill overrides
+*.local.md
