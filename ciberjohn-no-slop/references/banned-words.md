@@ -1,6 +1,6 @@
 # Banned Words, Phrases, and Openers
 
-Statistically flagged as AI-generated text markers across multiple studies (Carnegie Mellon 2025, Wikipedia Signs of AI Writing, Buffer 52M post analysis, community detection patterns on X and Reddit). Never use any of these. Replace with concrete alternatives or restructure the sentence.
+Statistically flagged as AI-generated text markers across multiple studies (Cheng et al. 2025, Russell, Karpinska & Iyyer 2025, Juzek & Ward 2025, Wikipedia's Signs of AI Writing field guide, and community detection patterns on X and Reddit). Never use any of these. Replace with concrete alternatives or restructure the sentence.
 
 ## Banned Vocabulary
 

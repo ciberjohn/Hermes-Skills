@@ -180,4 +180,4 @@ It scans for banned vocabulary, banned phrases, banned openers, em dash overuse,
 
 ## Attribution
 
-Adapted from [jalaalrd/anti-ai-slop-writing](https://github.com/jalaalrd/anti-ai-slop-writing) (MIT, author Jalaaldeen) and the anti-slop checklist in the medium-story skill by ciberjohn. Detection research basis: Carnegie Mellon (2025), Wikipedia "Signs of AI writing", Buffer 52M post analysis. MIT license.
+Adapted from [jalaalrd/anti-ai-slop-writing](https://github.com/jalaalrd/anti-ai-slop-writing) (MIT, author Jalaaldeen) and the anti-slop checklist in the medium-story skill by ciberjohn. Detection research basis: Cheng et al. 2025 (Advances in Simulation), Russell, Karpinska & Iyyer 2025 (ACL), Kobak et al. 2025 (Science Advances), and Wikipedia's "Signs of AI writing" field guide. MIT license.

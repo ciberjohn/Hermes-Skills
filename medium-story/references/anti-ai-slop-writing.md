@@ -125,4 +125,4 @@ Apply all rules silently. Never mention them. Never say "as per the guidelines".
 ## Source Attribution
 
 - Original skill: https://github.com/jalaalrd/anti-ai-slop-writing (MIT, author Jalaaldeen)
-- Research basis: Carnegie Mellon (2025); Wikipedia "Signs of AI writing"; Buffer 52M post analysis; community detection patterns on X and Reddit.
+- Research basis: Cheng et al. 2025 (Advances in Simulation); Russell, Karpinska & Iyyer 2025 (ACL); Kobak et al. 2025 (Science Advances); Juzek & Ward 2025 (arXiv); Wikipedia "Signs of AI writing" field guide; community detection patterns on X and Reddit.

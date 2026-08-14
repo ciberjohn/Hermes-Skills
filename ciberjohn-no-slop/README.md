@@ -90,7 +90,7 @@ ciberjohn-no-slop/
 
 ## Attribution
 
-Adapted from [jalaalrd/anti-ai-slop-writing](https://github.com/jalaalrd/anti-ai-slop-writing) (MIT, author Jalaaldeen) and the anti-slop checklist in the [medium-story](https://github.com/ciberjohn/Hermes-Skills/tree/main/medium-story) skill. Detection research basis: Carnegie Mellon (2025), Wikipedia "Signs of AI writing", Buffer 52M post analysis.
+Adapted from [jalaalrd/anti-ai-slop-writing](https://github.com/jalaalrd/anti-ai-slop-writing) (MIT per its README, author Jalaaldeen) and the anti-slop checklist in the [medium-story](https://github.com/ciberjohn/Hermes-Skills/tree/main/medium-story) skill. Detection research basis: Cheng et al. 2025 (Advances in Simulation), Russell, Karpinska & Iyyer 2025 (ACL), Kobak et al. 2025 (Science Advances), and Wikipedia's "Signs of AI writing" field guide.
 
 ## License
 
