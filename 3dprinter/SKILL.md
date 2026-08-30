@@ -131,10 +131,18 @@ All scripts read the state file from `{{STATE_FILE}}` (or `$3DPRINTER_STATE`).
   be ignored on this machine (gcode emits `M190/M140 S35`). `slice.py`
   post-processes bed temps from the material table and verifies — never ship
   gcode with a 35°C bed. Verify: `grep -oE "M1(90|40) S[0-9]+" file.gcode`.
-- **HTTP API (8898) not listening**: some AD5X firmware versions don't serve the
-  HTTP API even in LAN mode (all requests get empty replies) while TCP 8899
-  works. File listing falls back to TCP, but **uploads require HTTP** — check
-  the printer's LAN/remote-control mode, the Printer ID/check code, or reboot.
+- **HTTP API (8898) requires LAN mode**: if all HTTP requests get empty replies
+  while TCP 8899 works, the printer is not in **LAN mode** (touchscreen
+  Settings → Network) — enable it and reboot. LAN mode disables the vendor
+  cloud app's webcam monitoring; use the printer's own MJPEG stream instead:
+  `http://<PRINTER_IP>:8080/?action=stream` (also returned by `POST /detail`
+  as `cameraStreamUrl`; the library exposes it via
+  `client.info.get_detail_response()` → `.camera_stream_url`). Open the URL in
+  any browser to watch the print.
+- **AD5X material-station uploads**: for multi-color/material-station prints
+  use `upload_file_ad5x` with `AD5XUploadParams` (+ material mappings); the
+  `ff_print.py` `upload` command uses the simpler `upload_file` path (fine for
+  single-material jobs).
 - **Credentials**: serial number + check code are per-printer credentials —
   keep them out of logs, bug reports, and public repos; `chmod 600` the state
   file (channels.py enforces it on writes).

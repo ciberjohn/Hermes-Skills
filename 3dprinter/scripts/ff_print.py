@@ -69,7 +69,7 @@ async def cmd_upload(st, gcode, start):
     c = await _connect(st)
     try:
         await c.init_control()
-        ok = await c.job_control.upload_file(gcode, start_print=start)
+        ok = await c.job_control.upload_file(gcode, start_print=start, level_before_print=start)
         print("upload:", "OK" if ok else "FAILED (HTTP API likely unavailable)")
     finally:
         await c.dispose()
