@@ -37,8 +37,15 @@ Set these before running the pipeline, or answer the install prompt and let your
 
 ## Setup
 
-1. Install **OrcaSlicer** (Linux AppImage works headless; the AppImage needs
-   `libopengl0 libglu1-mesa libwebkit2gtk-4.1-0` on Debian/Ubuntu).
+1. Install **OrcaSlicer** if missing — download the Linux AppImage from
+   https://github.com/OrcaSlicer/OrcaSlicer/releases (v2.4.2 asset pattern
+   `OrcaSlicer_Linux_AppImage_Ubuntu2404_*.AppImage`, x86_64), install deps
+   `libopengl0 libglu1-mesa libwebkit2gtk-4.1-0 libjavascriptcoregtk-4.1-0`,
+   `chmod +x`, verify with `--help`. If `{{ORCA_BIN}}` is missing or the file
+   does not exist, offer to install it — you may download and set it up
+   yourself rather than just asking for a path. Headless: export
+   `APPIMAGE_EXTRACT_AND_RUN=1` or extract once with `--appimage-extract` and
+   point `{{ORCA_BIN}}` at `squashfs-root/AppRun`.
 2. Install the Python API: `pip install flashforge-python-api`.
 3. Copy `assets/profiles/*.json` (SOP-tuned PLA/PETG filament profiles and a
    quality process profile) next to your OrcaSlicer profile collection, and

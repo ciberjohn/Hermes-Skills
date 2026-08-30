@@ -30,28 +30,59 @@ Copy 3dprinter/SKILL.md into ~/.hermes/skills/3dprinting/3dprinter/SKILL.md,
 the contents of 3dprinter/scripts/ into .../scripts/, the contents of
 3dprinter/assets/ into .../assets/, and 3dprinter/.gitignore into .../.gitignore.
 Create the subdirectories if they don't exist. Then:
-1. Copy 3dprinter/assets/profiles/*.json into ~/3dprinter/profiles/.
-2. Ask me:
+1. If OrcaSlicer isn't installed yet, install it (see "Installing OrcaSlicer"
+   in the README — download the AppImage, apt-get the 4 runtime deps, chmod +x).
+2. Copy 3dprinter/assets/profiles/*.json into ~/3dprinter/profiles/.
+3. Ask me:
    1. What is the LAN IP of the Flashforge AD5X printer?
    2. What is the printer's serial number?
    3. What is the printer's check code / Printer ID (Settings -> Network)?
    4. Where is OrcaSlicer installed (path to the AppImage or binary)?
    5. Where is the 'Flashforge AD5X 0.4 nozzle' machine profile JSON?
-3. Create ~/3dprinter/state.json with my answers, setting slicer.profiles_dir
+4. Create ~/3dprinter/state.json with my answers, setting slicer.profiles_dir
    to ~/3dprinter/profiles/ and slicer.output_dir to ~/3dprinter/gcode.
-4. chmod 600 ~/3dprinter/state.json (it holds printer credentials).
-5. Install flashforge-python-api, then verify with a test slice of a 20mm cube
+5. chmod 600 ~/3dprinter/state.json (it holds printer credentials).
+6. Install flashforge-python-api, then verify with a test slice of a 20mm cube
    and show me the output.
 ```
 
 ## Prerequisites
 
 - [Hermes Agent](https://hermes-agent.nousresearch.com) — the skill engine.
-- **OrcaSlicer** (2.4.x) on a Linux host — AppImage works headless. Debian/Ubuntu
-  runtime deps: `libopengl0 libglu1-mesa libwebkit2gtk-4.1-0`.
+- **OrcaSlicer** (2.4.x) on a Linux host — AppImage works headless. See
+  [Installing OrcaSlicer](#installing-orcaslicer) below.
 - **Python 3** + `pip install flashforge-python-api` for the printer-control script.
 - **Flashforge AD5X** with LAN mode enabled; serial number and check code
   (Printer ID) from the printer's touchscreen (Settings → Network).
+
+## Installing OrcaSlicer
+
+The skill does **not** bundle OrcaSlicer — install it once on the host that
+will slice (Linux; the AppImage runs headless):
+
+```bash
+# 1. Runtime deps (Debian/Ubuntu)
+sudo apt-get install -y libopengl0 libglu1-mesa libwebkit2gtk-4.1-0 libjavascriptcoregtk-4.1-0
+
+# 2. Download the Linux AppImage (v2.4.2, x86_64 Ubuntu 24.04)
+curl -L -o ~/OrcaSlicer.AppImage \
+  https://github.com/OrcaSlicer/OrcaSlicer/releases/download/v2.4.2/OrcaSlicer_Linux_AppImage_Ubuntu2404_V2.4.2.AppImage
+chmod +x ~/OrcaSlicer.AppImage
+
+# 3. Verify the CLI responds
+~/OrcaSlicer.AppImage --help
+```
+
+Headless notes:
+
+- If the AppImage refuses to run headless, either export
+  `APPIMAGE_EXTRACT_AND_RUN=1` or extract it once and run the extracted binary:
+  `~/OrcaSlicer.AppImage --appimage-extract` → `~/squashfs-root/AppRun`.
+- Newer releases: https://github.com/OrcaSlicer/OrcaSlicer/releases (asset
+  pattern `OrcaSlicer_Linux_AppImage_Ubuntu2404_*.AppImage`; pick the x86_64
+  one unless your host is aarch64).
+- Point `ORCA_BIN` / `slicer.orca_bin` at the AppImage (or the extracted
+  `AppRun`).
 
 ## Installation
 
