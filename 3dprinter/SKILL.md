@@ -47,10 +47,10 @@ Set these before running the pipeline, or answer the install prompt and let your
    `APPIMAGE_EXTRACT_AND_RUN=1` or extract once with `--appimage-extract` and
    point `{{ORCA_BIN}}` at `squashfs-root/AppRun`.
 2. Install the Python API: `pip install flashforge-python-api`.
-3. Copy `assets/profiles/*.json` (SOP-tuned PLA/PETG filament profiles and a
-   quality process profile) next to your OrcaSlicer profile collection, and
-   point `{{ORCA_MACHINE_PROFILE}}` at the "Flashforge AD5X 0.4 nozzle" machine
-   profile that ships with OrcaSlicer.
+3. Copy `assets/profiles/*.json` (SOP-tuned PLA/PETG filament profiles plus
+   quality and fast process profiles) next to your OrcaSlicer profile
+   collection, and point `{{ORCA_MACHINE_PROFILE}}` at the
+   "Flashforge AD5X 0.4 nozzle" machine profile that ships with OrcaSlicer.
 4. Create `{{STATE_FILE}}` (default `~/3dprinter/state.json`; override with the
    `3DPRINTER_STATE` env var). The variables map into it like this:
    - `{{PRINTER_IP}}`, `{{PRINTER_SERIAL}}`, `{{PRINTER_CHECK_CODE}}` →
@@ -81,7 +81,7 @@ Set these before running the pipeline, or answer the install prompt and let your
    decorative / functional / prototype; supports on/off; quantity.
 4. **Slice**:
    ```bash
-   python3 scripts/slice.py model.stl --material PLA [--name foo]
+   python3 scripts/slice.py model.stl --material PLA [--name foo] [--profile "Spock Fast 0.24 @FF AD5X.json"] [--supports none] [--infill 10] [--layer 0.24]
    ```
    → gcode at `<output_dir>/<name>_<MATERIAL>.gcode` plus est. time, layers and
    `bed_verified` (the script fixes the OrcaSlicer bed-temp quirk and verifies).
@@ -124,6 +124,30 @@ Defaults (0.4 mm nozzle, AD5X):
 | Bed prep | No glue; clean with dish soap | **Glue stick mandatory** (PETG fuses to PEI); let bed cool before removal |
 | Wet filament | — | "popping"/stringing → dry 65°C / 6 h |
 
+## Start gcode — PETG-safe purge (recommended)
+
+If you switch between PETG and PLA, add this purge to the machine profile's
+`machine_start_gcode` so residual PETG (which needs 235–245°C) doesn't
+contaminate a PLA first layer (PLA prints at 210°C — too cold to melt leftover
+PETG). Verified routine — edit the `Flashforge AD5X 0.4 nozzle` machine profile
+pointed to by `{{ORCA_MACHINE_PROFILE}}`:
+
+```
+M190 S[bed_temperature_initial_layer_single]
+M109 S[nozzle_temperature_initial_layer]   ; 215 for PLA
+G90 / M83 / G1 Z2 / G1 X50 Y220 Z0.25      ; move to purge position
+M104 S245 / M109 S245                      ; heat to PETG-safe temp
+G1 E10 F600                                ; push 10mm — flushes residual PETG
+G1 E-1 F1200                               ; retract to stop ooze while cooling
+M104 S[nozzle_temperature_initial_layer]
+M109 S[nozzle_temperature_initial_layer]   ; back to print temp
+G92 E0 … normal purge line at print temp
+```
+
+- Costs ~1–2 min per print start. Harmless for PLA-only workflows.
+- Verify after editing: re-slice and confirm `M104 S245` appears before the
+  normal purge line in the output gcode.
+
 ## Scripts
 
 - `scripts/slice.py` — headless slice + bed-temp fix + verification
@@ -157,6 +181,22 @@ All scripts read the state file from `{{STATE_FILE}}` (or `$3DPRINTER_STATE`).
   channel/material is loaded. `defaults.auto_start_print` is an agent-level
   policy (the agent reads it and refuses to auto-start when false); the CLI
   `--start` flag is the explicit override after confirmation.
+- **Station-feed phase is SLOW — don't cancel**: once a material-station slot is
+  configured, the printer runs a station feed (`state_action == 4`) at print
+  start. It pushes filament from the spool through the ~1 m tube and can take
+  **5–10 minutes**: nozzle holds ~140°C standby, layer stays 0, run time 00:00.
+  This is normal — wait for the feed to finish, then the nozzle heats to print
+  temp and the purge line runs.
+- **Runout at layer 1–2 = filament not seated in the extruder**, not a spool
+  problem (the station slot sensor can report loaded while the extruder sensor
+  sees nothing). Fix: hand-feed filament into the extruder while purging — API
+  purge works: `set_extruder_temp(230, wait_for=False)` then
+  `extrude(100, 300)` (~20 s purge). Note the extrude command **acks instantly
+  but executes asynchronously** — a 0.0 s return does NOT mean it failed; watch
+  the nozzle for flow.
+- **Camera stream may serve no frames while the print is paused/feeding** —
+  the MJPEG connection opens but returns EOF. Retry during active printing;
+  don't burn cycles diagnosing the network mid-print.
 
 ## Verification
 

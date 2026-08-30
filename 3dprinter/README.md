@@ -8,7 +8,7 @@ printer's LAN API.
 ## What It Does
 
 - **SLICE** — headless OrcaSlicer 2.4.2 CLI slicing with SOP-tuned filament
-  profiles (PLA/PETG) and a quality process profile. The agent picks optimal
+  profiles (PLA/PETG) plus quality and fast process profiles. The agent picks optimal
   infill/support parameters per print intent (quality/speed balance + easy
   support removal).
 - **VERIFY** — the slice script fixes a known OrcaSlicer bed-temp quirk on the

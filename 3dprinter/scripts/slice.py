@@ -8,6 +8,8 @@ Options:
   --infill PCT     infill percentage (default: from state defaults)
   --supports MODE  auto|none|tree (default: from state defaults)
   --layer MM       layer height (default: from state defaults)
+  --profile NAME   process profile filename in profiles_dir
+                   (default: Spock Quality 0.20 @FF AD5X.json)
   --name NAME      output gcode name (default: <model>_<MATERIAL>)
   --json           machine-readable output
 
@@ -84,6 +86,7 @@ def main():
     ap.add_argument("--infill", default=None, type=int)
     ap.add_argument("--supports", default=None, choices=["auto", "none", "tree"])
     ap.add_argument("--layer", default=None, type=float)
+    ap.add_argument("--profile", default=None, help="process profile filename (default: Spock Quality 0.20)")
     ap.add_argument("--name", default=None)
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
@@ -102,7 +105,7 @@ def main():
         sys.exit(f"model not found: {args.model}")
 
     fil = os.path.join(sl.get("profiles_dir", ""), FILAMENT_PROFILE[mat])
-    base_proc = os.path.join(sl.get("profiles_dir", ""), PROCESS_PROFILE)
+    base_proc = os.path.join(sl.get("profiles_dir", ""), args.profile if args.profile else PROCESS_PROFILE)
     missing = [p for p in (sl.get("orca_bin"), sl.get("machine_profile"), fil, base_proc) if not p or not os.path.exists(p)]
     if missing:
         sys.exit(f"missing files (check state.json slicer paths): {missing}")
