@@ -1,0 +1,21 @@
+# Generated output
+*.gcode
+*.3mf
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment and secrets
+.env
+*.env
+secrets/
+credentials/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local state (never commit printer credentials)
+*state*.json
