@@ -1,0 +1,11 @@
+services:
+  lcars-printer:
+    build: .
+    image: lcars-printer:latest
+    container_name: lcars-printer
+    restart: unless-stopped
+    # Bind to localhost only; expose to the tailnet with `tailscale serve`
+    ports:
+      - "127.0.0.1:8890:8890"
+    env_file:
+      - .env
