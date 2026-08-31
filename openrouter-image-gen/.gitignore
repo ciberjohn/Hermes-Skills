@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment and secrets
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Generated images (regenerated on demand)
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
