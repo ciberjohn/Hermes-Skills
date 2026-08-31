@@ -3,7 +3,7 @@ name: medium-story
 description: "Full Medium article pipeline using native Hermes tools. Research → write → 4 parallel output agents → HTML conversion → git commit/push. Includes pre-flight infrastructure verification step, revisor-methodology fact-checking, and an anti-AI-slop writing pass (banned vocabulary, structural variety, accuracy rules)."
 license: MIT
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   tags: [writing, medium, linkedin, youtube, content, publishing, technical, blog, anti-slop]
   platforms: [linux]
   related_skills: [short-videos, technical-writing]
@@ -374,7 +374,7 @@ Read the dialogue aloud. If it sounds like a LinkedIn post from someone trying t
 
 ### Attribution / Byline Format
 
-When writing under ciberjohn's name, use this attribution format:
+When writing under the author's name, use this attribution format:
 
 > {{PUBLISHED_AUTHOR}} — *{{BYLINE_DESCRIPTION}}*
 
@@ -452,6 +452,18 @@ Context rules: "robust" is banned outside engineering contexts; "empower/elevate
 
 **Propagation to output agents:** the other pipeline outputs (Heygen script, LinkedIn post, YouTube script) are written under the same constraints. Include `references/anti-ai-slop-writing.md` in the delegate_task context for Agents B, C, and D in Step 7.
 
+### Step 6c: Story illustrations — OpenRouter + recurring character (Recommended for stories with images)
+
+- **Load an image-generation skill** (e.g. `openrouter-image-gen`: cheap image models over a chat-completions endpoint, no GPU; the image comes back embedded in the JSON — walk the whole response recursively for `data:image` strings). Generate the hero illustration after the article is final, before packaging.
+- **The recurring character (series rule):** define ONE cartoon character and reuse it in every story illustration so the series reads as a single body of work. Example spec you can customise:
+  - A cartoon person of your choosing (example used by the author: stout/bald man, short goatee, round glasses, warm smile, plain black T-shirt)
+  - Their workspace: cluttered desk, monitors with data visuals, shelves with books and electronics, warm lamp, string lights, night window
+  - A recurring motif: sci-fi paraphernalia (model starship, poster) — describe generically, never ask for trademarked logos
+  - Palette: cool blues/teals/purples with warm amber accents; wide 16:9; editorial cartoon style; "no real logos, no brand names, no watermark"
+- **The Illustration Engineer:** treat illustration as a dedicated role. Either spawn a subagent ("Illustration Engineer") with the character spec, the image-generation skill and the article's topic as context, or run the generator directly. The engineer owns: prompt (topic-to-image translation), generation, verification, saving `illustration.png` into the story folder, and returning the `[*FILES*: illustration.png — description]` line.
+- **Verification (always):** check the generated image with a vision-capable model — the generator can lie about what it drew. Confirm the character is present, requested props are present, and no text is garbled. Regenerate if any check fails.
+- **Animated assets (optional):** for diagrams and force graphs, render animated GIFs programmatically from the actual data or physics (e.g. Pillow), not an image model. Keep them abstract — no real note content, nothing sensitive.
+
 ### Step 7: Run four parallel output agents
 
 Spawn agents via `delegate_task` in **two batches** because of the `max_concurrent_children=3` limit (configurable in `config.yaml` under `delegation.max_concurrent_children`, but default is 3).
@@ -473,7 +485,7 @@ Spawn agents via `delegate_task` in **two batches** because of the `max_concurre
 - **See `references/revisor-methodology.md`** for the structured fact-checking methodology: GitHub API verification patterns, grep commands for British English and Americanism detection, dash audit commands, source URL validation, and report formatting.
 
 #### Agent B — Heygen Script (`video-script.md`)
-- 90-second teleprompter script for ciberjohn's HeyGen digital twin
+- 90-second teleprompter script for the author's HeyGen digital twin
 - Timestamped blocks: `[HOOK] 00:00–00:05`, `[SETUP] 00:05–00:20`, `[INSIGHT 1] 00:20–00:40`, `[INSIGHT 2] 00:40–01:00`, `[PAYOFF] 01:00–01:20`, `[CTA] 01:20–01:30`
 - Each block uses inline colons (NOT markdown tables) with four fields:
   `Spoken: <text>` — spoken word content
