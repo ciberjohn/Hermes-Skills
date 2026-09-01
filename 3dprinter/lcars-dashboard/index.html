@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>USS Enterprise — Printer Operations</title>
+<style>
+  :root{
+    --bg:#050505; --panel:#0d0d12; --panel2:#101018;
+    --orange:#ff9c00; --orange-hi:#ffb347; --blue:#7ab8ff; --teal:#66cccc;
+    --gold:#ffcc66; --purple:#cc99ff; --red:#ff6b6b; --green:#7dff9a;
+    --text:#e8e8e8; --dim:#8a8a99; --line:#2a2a38;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--text);
+    font-family:"Segoe UI", "Helvetica Neue", Arial, sans-serif; min-height:100%;}
+  body{padding:18px 22px 30px;}
+  .mono{font-family:"Consolas","SF Mono",Menlo,monospace;}
+
+  /* ---- LCARS header ---- */
+  .topbar{display:flex; align-items:center; gap:14px; margin-bottom:22px;}
+  .title-pill{background:var(--orange); color:#000; font-weight:800; letter-spacing:3px;
+    text-transform:uppercase; font-size:22px; padding:12px 34px 12px 26px;
+    border-radius:999px 14px 14px 999px; position:relative; white-space:nowrap;}
+  .title-pill::after{content:""; position:absolute; right:0; top:0; bottom:0; width:22px;
+    background:var(--bg); border-radius:14px 0 0 14px;}
+  .sub-pill{background:var(--panel); border:1px solid var(--line); color:var(--blue);
+    letter-spacing:2px; text-transform:uppercase; font-size:13px; padding:8px 18px;
+    border-radius:999px;}
+  .stardate{margin-left:auto; text-align:right; color:var(--dim); letter-spacing:1px;
+    font-size:12px; line-height:1.5;}
+  .stardate b{color:var(--gold); display:block; font-size:16px;}
+
+  .rail{height:6px; border-radius:3px; margin-bottom:18px; background:linear-gradient(90deg,
+    var(--orange) 0 18%, var(--blue) 18% 34%, var(--teal) 34% 46%, var(--purple) 46% 58%,
+    var(--gold) 58% 72%, var(--red) 72% 84%, var(--blue) 84% 100%); opacity:.9;}
+
+  /* ---- panels ---- */
+  .grid{display:grid; grid-template-columns: 380px 1fr; gap:18px;}
+  @media (max-width: 900px){ .grid{grid-template-columns:1fr;} }
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:26px;
+    padding:18px 20px; position:relative; overflow:hidden;}
+  .panel::before{content:""; position:absolute; top:-1px; right:-1px; width:38px; height:38px;
+    background:var(--bg); border-bottom:1px solid var(--line); border-left:1px solid var(--line);
+    border-bottom-left-radius:26px;}
+  .panel h2{color:var(--orange); letter-spacing:2px; text-transform:uppercase; font-size:13px;
+    margin-bottom:14px; padding-right:34px;}
+
+  /* ---- status ---- */
+  .state-row{display:flex; align-items:center; gap:12px; margin-bottom:16px;}
+  .led{width:16px; height:16px; border-radius:50%; background:#444; flex:0 0 auto;}
+  .led.printing{background:var(--orange); box-shadow:0 0 12px var(--orange); animation:pulse 1.6s infinite;}
+  .led.ready{background:var(--green); box-shadow:0 0 10px var(--green);}
+  .led.paused{background:var(--gold); box-shadow:0 0 10px var(--gold);}
+  .led.error{background:var(--red); box-shadow:0 0 10px var(--red); animation:pulse .8s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.35;}}
+  .state-word{font-size:26px; font-weight:800; letter-spacing:2px; text-transform:uppercase;
+    color:var(--text);}
+  .state-file{color:var(--dim); font-size:12px; word-break:break-all; margin-bottom:14px;}
+
+  .kv{display:flex; justify-content:space-between; align-items:baseline; padding:5px 0;
+    border-bottom:1px dashed var(--line); font-size:14px;}
+  .kv:last-child{border-bottom:none;}
+  .kv .k{color:var(--dim); letter-spacing:1px; text-transform:uppercase; font-size:11px;}
+  .kv .v{color:var(--text); font-weight:700; font-size:15px;}
+
+  /* temps */
+  .tempbar{margin:10px 0 6px;}
+  .tempbar .lbl{display:flex; justify-content:space-between; font-size:11px; color:var(--dim);
+    letter-spacing:1px; text-transform:uppercase; margin-bottom:4px;}
+  .tempbar .lbl b{color:var(--text);}
+  .track{height:10px; background:var(--panel2); border-radius:5px; overflow:hidden;
+    border:1px solid var(--line);}
+  .fill{height:100%; width:0%; transition:width .6s ease;}
+  .fill.nozzle{background:linear-gradient(90deg,var(--orange),var(--gold));}
+  .fill.bed{background:linear-gradient(90deg,var(--blue),var(--teal));}
+
+  /* progress */
+  .progress-num{font-size:34px; font-weight:800; color:var(--gold); letter-spacing:1px;}
+  .progress-sub{color:var(--dim); font-size:12px; letter-spacing:1px; text-transform:uppercase;}
+
+  /* ---- camera ---- */
+  .cam{background:#000; border-radius:18px; overflow:hidden; aspect-ratio:4/3;
+    display:flex; align-items:center; justify-content:center; border:1px solid var(--line);}
+  .cam img{width:100%; height:100%; object-fit:contain;}
+  .cam .ph{color:var(--dim); letter-spacing:2px; text-transform:uppercase; font-size:13px;}
+
+  /* ---- replicator preview ---- */
+  .preview{background:#000; border-radius:18px; overflow:hidden; aspect-ratio:1/1;
+    display:flex; align-items:center; justify-content:center; border:1px solid var(--line);}
+  .preview img{width:100%; height:100%; object-fit:contain;}
+  .preview .ph{color:var(--dim); letter-spacing:2px; text-transform:uppercase; font-size:11px;
+    text-align:center; padding:0 24px; line-height:1.7;}
+  .preview-sub{color:var(--gold); font-size:11px; letter-spacing:1px; margin-top:8px;
+    text-align:center; word-break:break-all;}
+
+  /* ---- buttons ---- */
+  .btns{display:flex; gap:12px; margin-top:14px; flex-wrap:wrap;}
+  .btn{border:none; cursor:pointer; font-weight:800; letter-spacing:2px; text-transform:uppercase;
+    padding:12px 26px; border-radius:999px; font-size:14px; transition:transform .08s ease, filter .15s;}
+  .btn:active{transform:scale(.97);}
+  .btn:disabled{opacity:.35; cursor:not-allowed;}
+  .btn.engage{background:var(--orange); color:#000;}
+  .btn.engage:hover{filter:brightness(1.1);}
+  .btn.standdown{background:transparent; color:var(--red); border:1px solid var(--red);}
+  .btn.snap{background:transparent; color:var(--blue); border:1px solid var(--blue);}
+  .btn.snap:hover{background:var(--blue); color:#000;}
+  .btn.comms{background:var(--purple); color:#000;}
+  .btn.comms:hover{filter:brightness(1.1);}
+
+  /* ---- files ---- */
+  .files{height:190px; overflow-y:auto; border:1px solid var(--line); border-radius:14px;
+    background:var(--panel2); padding:8px 10px;}
+  .files .f{display:flex; justify-content:space-between; gap:10px; padding:6px 8px;
+    border-bottom:1px solid #1c1c28; font-size:12px; color:var(--text);}
+  .files .f:last-child{border-bottom:none;}
+  .files .f .n{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .files .f .m{color:var(--dim); flex:0 0 auto;}
+  .files::-webkit-scrollbar{width:8px;}
+  .files::-webkit-scrollbar-thumb{background:var(--orange); border-radius:4px;}
+
+  .footer{margin-top:18px; color:var(--dim); font-size:11px; letter-spacing:1px;
+    display:flex; gap:18px; flex-wrap:wrap;}
+  .banner{display:none; margin-top:10px; padding:10px 14px; border-radius:12px;
+    background:#1a1010; color:var(--red); border:1px solid var(--red); font-size:13px;}
+  .lastupd{color:var(--dim); font-size:11px; letter-spacing:1px; text-align:right; margin-top:6px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="title-pill">AD5X&nbsp;OPS</div>
+  <div class="sub-pill">USS Enterprise · Replicator Bay</div>
+  <button class="btn comms" id="btnComms">🖖 Comms</button>
+  <div class="stardate">STELLAR DATE<br><b id="stardate">—</b></div>
+</div>
+<div class="rail"></div>
+
+<div class="grid">
+  <!-- LEFT: status -->
+  <div>
+    <div class="panel">
+      <h2>Printer Status</h2>
+      <div class="state-row">
+        <div class="led" id="led"></div>
+        <div class="state-word" id="state">OFFLINE</div>
+      </div>
+      <div class="state-file mono" id="sfile">—</div>
+      <div class="kv"><span class="k">Layer</span><span class="v mono" id="layer">—</span></div>
+      <div class="kv"><span class="k">Progress</span><span class="v mono" id="prog">—</span></div>
+      <div class="kv"><span class="k">ETA</span><span class="v mono" id="eta">—</span></div>
+      <div class="kv"><span class="k">Firmware</span><span class="v mono" id="fw">—</span></div>
+      <div class="kv"><span class="k">Address</span><span class="v mono" id="addr">—</span></div>
+      <div class="kv"><span class="k">Files</span><span class="v mono" id="fcount">—</span></div>
+    </div>
+
+    <div class="panel" style="margin-top:18px;">
+      <h2>Thermals</h2>
+      <div class="tempbar">
+        <div class="lbl"><span>Nozzle</span><b class="mono" id="noz">—</b></div>
+        <div class="track"><div class="fill nozzle" id="nozfill"></div></div>
+      </div>
+      <div class="tempbar">
+        <div class="lbl"><span>Bed</span><b class="mono" id="bed">—</b></div>
+        <div class="track"><div class="fill bed" id="bedfill"></div></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:18px;">
+      <h2>Command Deck</h2>
+      <div class="btns">
+        <button class="btn engage" id="btnEngage">▶ Engage Watch</button>
+        <button class="btn standdown" id="btnStand" disabled>■ Stand Down</button>
+      </div>
+      <div class="banner" id="banner"></div>
+      <div class="lastupd" id="lastupd">no feed — press ENGAGE to open hailing frequencies</div>
+    </div>
+  </div>
+
+  <!-- RIGHT: camera -->
+  <div>
+    <div class="panel">
+      <h2>Visual Feed</h2>
+      <div class="cam" id="cam">
+        <img id="camimg" alt="" style="display:none;">
+        <span class="ph" id="camph">FEED CLOSED — ENGAGE TO VIEW</span>
+      </div>
+      <div class="btns">
+        <button class="btn snap" id="btnSnap" disabled>◉ Snapshot</button>
+        <button class="btn snap" id="btnLive" disabled>↻ Live Stream</button>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:18px;">
+      <h2>Replicator Preview</h2>
+      <div class="preview" id="prevbox">
+        <img id="previmg" alt="" style="display:none;">
+        <span class="ph" id="prevph">NO ACTIVE PRINT</span>
+      </div>
+      <div class="preview-sub mono" id="prevname">—</div>
+    </div>
+
+    <div class="panel" style="margin-top:18px;">
+      <h2>On-Board Files</h2>
+      <div class="files" id="files"><div class="f"><span class="n">—</span></div></div>
+    </div>
+
+    <div class="footer">
+      <span id="footRelay">relay: pve01 · tailnet-only</span>
+      <span id="footNote">camera streams only while actively printing</span>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const state = { watching:false, statusTimer:null, filesTimer:null,
+                lastStatus:null, snapshot:false, lastFile:null };
+
+/* ---------- stardate ---------- */
+function stardate(){
+  const now = new Date();
+  const y = now.getUTCFullYear();
+  const day = Math.floor((Date.UTC(y, now.getUTCMonth(), now.getUTCDate())
+        - Date.UTC(y,0,1)) / 86400000) + 1;
+  return String(y*1000 + Math.round(day*10/365.25)).slice(0,7).padEnd(7,"0");
+}
+$("stardate").textContent = stardate();
+
+/* ---------- LCARS state ---------- */
+function setLed(stateStr){
+  const led = $("led"), word = $("state");
+  led.className = "led";
+  const s = String(stateStr || "").toLowerCase();
+  if(s.includes("print")){ led.classList.add("printing"); word.textContent = "PRINTING"; }
+  else if(s.includes("ready") || s.includes("idle") || s.includes("complete")){
+    led.classList.add("ready"); word.textContent = s.includes("complete") ? "COMPLETE" : "READY";
+  }
+  else if(s.includes("pause")){ led.classList.add("paused"); word.textContent = "PAUSED"; }
+  else if(s.includes("error") || s.includes("fail")){ led.classList.add("error"); word.textContent = "ERROR"; }
+  else { word.textContent = (s || "OFFLINE").toUpperCase(); }
+}
+
+function renderStatus(data){
+  if(!data || !data.ok){
+    setLed("error");
+    $("state").textContent = "UNAVAILABLE";
+    $("sfile").textContent = data && data.error ? data.error : "printer unreachable";
+    showBanner("⚠ " + (data && data.error ? data.error : "No response from printer."));
+    return;
+  }
+  hideBanner();
+  const st = data.status;
+  setLed(st.machine_state || st.status);
+  $("sfile").textContent = st.file || "—";
+  $("layer").textContent = st.total_layers ? st.layer + " / " + st.total_layers : "—";
+  $("prog").textContent = st.progress != null ? st.progress + "%" : "—";
+  $("eta").textContent = st.eta && st.eta !== "00:00" ? st.eta : "—";
+  $("fw").textContent = st.firmware || "—";
+  $("addr").textContent = st.ip || "—";
+  $("fcount").textContent = data.file_count != null ? data.file_count : "—";
+  const noz = st.extruder, bed = st.bed;
+  if(noz){ $("noz").textContent = noz.current + "° / " + noz.set + "°";
+    $("nozfill").style.width = Math.min(100, noz.set ? noz.current/noz.set*100 : 0) + "%"; }
+  if(bed){ $("bed").textContent = bed.current + "° / " + bed.set + "°";
+    $("bedfill").style.width = Math.min(100, bed.set ? bed.current/bed.set*100 : 0) + "%"; }
+  state.lastStatus = data;
+  updatePreview(st);
+}
+
+/* ---------- replicator preview ---------- */
+function updatePreview(st){
+  const img = $("previmg"), ph = $("prevph"), name = $("prevname");
+  const file = st.file || "";
+  const printing = /print/i.test(st.machine_state || st.status || "");
+  if(!printing || !file){
+    img.style.display = "none"; img.src = "";
+    ph.style.display = "";
+    ph.textContent = printing ? "AWAITING PRINT FILE" : "NO ACTIVE PRINT";
+    name.textContent = "—";
+    state.lastFile = null;
+    return;
+  }
+  name.textContent = file;
+  if(state.lastFile === file) return;  // already projecting this file
+  state.lastFile = file;
+  img.style.display = "none";
+  ph.style.display = "";
+  ph.textContent = "COMPUTING PROJECTION…";
+  fetch("/api/preview?file=" + encodeURIComponent(file), {cache:"no-store"})
+    .then(r => r.json())
+    .then(d => {
+      if(!d.ok){
+        ph.style.display = ""; ph.textContent = "NO MODEL ON FILE";
+        img.style.display = "none"; img.src = "";
+        return;
+      }
+      img.src = d.gif; img.style.display = "";
+      ph.style.display = "none";
+    })
+    .catch(() => { ph.style.display = ""; ph.textContent = "PROJECTION UNAVAILABLE"; });
+}
+
+function renderFiles(data){
+  const el = $("files");
+  if(!data || !data.ok){ el.innerHTML = '<div class="f"><span class="n">unavailable</span></div>'; return; }
+  if(!data.files || !data.files.length){ el.innerHTML = '<div class="f"><span class="n">(empty)</span></div>'; return; }
+  el.innerHTML = data.files.map(f => {
+    const name = String(f);
+    const m = name.match(/\.gcode$/i) ? "" : "";
+    return '<div class="f"><span class="n mono">' + escapeHtml(name) + '</span><span class="m">' + m + '</span></div>';
+  }).join("");
+}
+
+function escapeHtml(s){ return s.replace(/[&<>"']/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+function showBanner(msg){ const b = $("banner"); b.textContent = msg; b.style.display = "block"; }
+function hideBanner(){ $("banner").style.display = "none"; }
+
+/* ---------- watching ---------- */
+function engage(){
+  if(state.watching) return;
+  state.watching = true;
+  $("btnEngage").disabled = true;
+  $("btnStand").disabled = false;
+  $("btnSnap").disabled = false;
+  $("btnLive").disabled = false;
+  $("camph").style.display = "none";
+  startCamera();
+  pollStatus();
+  pollFiles();
+  state.statusTimer = setInterval(pollStatus, 10000);
+  state.filesTimer = setInterval(pollFiles, 60000);
+  $("lastupd").textContent = "sensors engaged";
+}
+
+function standDown(){
+  state.watching = false;
+  clearInterval(state.statusTimer); state.statusTimer = null;
+  clearInterval(state.filesTimer);  state.filesTimer = null;
+  stopCamera();
+  $("btnEngage").disabled = false;
+  $("btnStand").disabled = true;
+  $("btnSnap").disabled = true;
+  $("btnLive").disabled = true;
+  $("camph").style.display = "";
+  $("lastupd").textContent = "feed closed — press ENGAGE to open hailing frequencies";
+  state.lastFile = null;
+  $("previmg").style.display = "none"; $("previmg").src = "";
+  $("prevph").style.display = ""; $("prevph").textContent = "NO ACTIVE PRINT";
+  $("prevname").textContent = "—";
+}
+
+function startCamera(){
+  if(state.snapshot) return;
+  const img = $("camimg");
+  img.style.display = "";
+  img.src = "/camera";
+  img.onerror = () => { /* stream stalls (camera idle) — suggest snapshot */ };
+}
+function stopCamera(){ const img = $("camimg"); img.src = ""; img.style.display = "none"; }
+
+$("btnEngage").onclick = engage;
+$("btnStand").onclick = standDown;
+$("btnSnap").onclick = () => {
+  if(!state.watching) return;
+  state.snapshot = true;
+  stopCamera();
+  const img = $("camimg");
+  img.style.display = "";
+  img.src = "/camera/snap?t=" + Date.now();
+  $("camph").style.display = "none";
+};
+$("btnLive").onclick = () => {
+  if(!state.watching) return;
+  state.snapshot = false;
+  startCamera();
+};
+
+/* ---------- polling ---------- */
+async function pollStatus(){
+  if(!state.watching) return;
+  try{
+    const r = await fetch("/api/status", {cache:"no-store"});
+    const data = await r.json();
+    renderStatus(data);
+    $("lastupd").textContent = "last telemetry " + new Date().toLocaleTimeString();
+  }catch(e){ renderStatus({ok:false, error:"fetch failed"}); }
+}
+async function pollFiles(){
+  if(!state.watching) return;
+  try{
+    const r = await fetch("/api/files", {cache:"no-store"});
+    renderFiles(await r.json());
+  }catch(e){ renderFiles({ok:false}); }
+}
+
+/* pause polling when tab hidden — don't hammer the server */
+document.addEventListener("visibilitychange", () => {
+  if(document.hidden && state.watching){
+    clearInterval(state.statusTimer); state.statusTimer = null;
+    clearInterval(state.filesTimer);  state.filesTimer = null;
+    stopCamera();
+  } else if(!document.hidden && state.watching){
+    if(!state.statusTimer) state.statusTimer = setInterval(pollStatus, 10000);
+    if(!state.filesTimer)  state.filesTimer  = setInterval(pollFiles, 60000);
+    startCamera();
+    pollStatus();
+  }
+});
+
+window.addEventListener("beforeunload", standDown);
+</script>
+<div id="comms-root"></div>
+<script src="comms.js"></script>
+<script>
+"use strict";
+document.getElementById("btnComms").onclick = function(){ window.__commsToggle(); };
+</script>
+</body>
+</html>

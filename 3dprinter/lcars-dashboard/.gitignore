@@ -4,3 +4,9 @@ state.json
 __pycache__/
 *.pyc
 server.log
+preview_cache/
+models/
+# repo-root *.html ignore is for generated articles — the dashboard's UI files
+# ARE source and must ship
+!index.html
+!comms.html

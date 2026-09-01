@@ -7,5 +7,17 @@ services:
     # Bind to localhost only; expose to the tailnet with `tailscale serve`
     ports:
       - "127.0.0.1:8890:8890"
+    # lets the container reach the host's Hermes api_server (loopback listener)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     env_file:
       - .env
+    environment:
+      - PREVIEW_MODELS_DIR=/models
+      - PREVIEW_CACHE_DIR=/cache
+    volumes:
+      # STL library for the Replicator Preview (read-only); point ./models at
+      # your slicer's model folder (or create it and drop STLs in)
+      - ./models:/models:ro
+      # generated preview GIFs persist between container recreates
+      - ./preview_cache:/cache
