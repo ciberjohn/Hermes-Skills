@@ -72,6 +72,15 @@ the camera. The printer's network stack is weak — don't hammer it.
 - The printer's touchscreen freeze and HTTP-API drops are the same wedged
   process on the stock firmware — LAN-only mode + gentle polling (the watch
   gate) are the practical mitigations.
+- **Comms bridge (chat with your agent from the dashboard):** `server.py`
+  forwards messages to the Hermes gateway's OpenAI-compatible API
+  (`/v1/chat/completions`). If the panel shows "agent unreachable — is the
+  gateway up?", the usual cause is Docker routing: `host.docker.internal`
+  resolves to the **docker0** gateway (172.17.0.1), NOT your compose network's
+  gateway, so a gateway API bound to the compose-network gateway IP is
+  unreachable. Fix: set `API_SERVER_URL` to the container network's literal
+  gateway IP, and/or bind the gateway API on `0.0.0.0` (authenticated with the
+  API key).
 - The parent skill (`3dprinter`) documents the full printer setup: channel
   inventory, slicing (slice.py), purge routine, PLA+/raft lessons, and the
   LAN-mode root cause.
