@@ -33,6 +33,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 STATE = os.environ.get("3DPRINTER_STATE", "state.json")
 PORT = int(os.environ.get("PORT", "8890"))
+# Bind 0.0.0.0 so Docker port mappings work; restrict externally with a
+# 127.0.0.1 host mapping or BIND=127.0.0.1 for bare-Python local use.
+BIND = os.environ.get("BIND", "0.0.0.0")
 
 
 def _printer_target():
@@ -185,8 +188,8 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
-    srv = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
-    print(f"lcars-printer listening on 127.0.0.1:{PORT}", flush=True)
+    srv = ThreadingHTTPServer((BIND, PORT), Handler)
+    print(f"lcars-printer listening on {BIND}:{PORT}", flush=True)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

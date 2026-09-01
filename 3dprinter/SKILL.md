@@ -205,6 +205,19 @@ All scripts read the state file from `{{STATE_FILE}}` (or `$3DPRINTER_STATE`).
   the CLI-override temp profile path works (436 layers, verified). Always
   confirm the resulting layer count / `; layer_height =` line in the gcode.
 
+- **`slice.py` writes `enable_support` (NOT `support_enable`)** — the invalid
+  key was silently ignored by the OrcaSlicer fork and **printed into thin air**
+  (2026-09-01 incident: a failed print, no supports in gcode). Fixed in
+  slice.py + a SUPPORT GATE: if `--supports auto|tree` is requested and the
+  gcode header shows `enable_support = 0`, slice.py exits non-zero — never
+  print that gcode.
+- **Verify model orientation BEFORE slicing** (same 2026-09-01 incident):
+  slice.py reports `base_mm2` (flat contact at Z=0) and warns when it is tiny
+  (<500 mm², e.g. a model standing on a knife edge). Stand/dock models with a
+  flat base often arrive rotated 90° — check min/max extents per axis and
+  rotate so the flat face is down. Render previews with
+  `scripts/stl_preview.py model.stl outprefix` before confirming the slice.
+
 ## Verification
 
 - Slice test: `slice.py test_cube.stl --material PLA --json` → `bed_verified: true`,
