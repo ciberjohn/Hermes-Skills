@@ -197,6 +197,13 @@ All scripts read the state file from `{{STATE_FILE}}` (or `$3DPRINTER_STATE`).
 - **Camera stream may serve no frames while the print is paused/feeding** —
   the MJPEG connection opens but returns EOF. Retry during active printing;
   don't burn cycles diagnosing the network mid-print.
+- **Direct `--profile` load ignores the profile's own `layer_height` key**
+  (verified 2026-09-01): slicing with `--profile "Spock Fast 0.24 @FF AD5X.json"`
+  produced 522 layers — identical to the 0.20 quality slice — even though the
+  profile sets `"layer_height": "0.24"`. Other keys (shells, initial layer,
+  speeds) DID apply. FIX: pass `--layer 0.24` (and `--infill 10`) explicitly —
+  the CLI-override temp profile path works (436 layers, verified). Always
+  confirm the resulting layer count / `; layer_height =` line in the gcode.
 
 ## Verification
 
