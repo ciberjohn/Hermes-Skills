@@ -24,10 +24,18 @@ from PIL import Image, ImageDraw
 BG      = (7, 7, 10)
 ORANGE  = (255, 156, 0)
 ORANGE_HI = (255, 190, 80)
-EDGE    = (190, 115, 10)   # silhouette outline — darker than fill, reads as edges
+# Material tone — warm PLA white: reads as a solid printed part (closer to the
+# final object) instead of a glowing hollow shell. Override with --color.
+MATERIAL    = (238, 233, 222)
+MATERIAL_HI = (255, 255, 250)
+EDGE    = (120, 115, 108)  # silhouette outline — defines edges on the material
 TEAL    = (102, 204, 204)
 PLATE_FILL = (14, 26, 34)
 SHADOW  = (0, 0, 0)
+
+# Bump when render output changes — the dashboard cache keys on it so browsers
+# never serve a stale render under the same URL.
+RENDER_VERSION = 3
 
 
 def load_stl(path):
@@ -178,9 +186,9 @@ def frame_image(tris, normals, lo, hi, center, radius, theta, tilt_deg,
         ys = np.clip(ys, -size * 0.5, size * 1.5)
         pts = list(zip(xs, ys))
         shade = bright[i]
-        col = tuple(int(round(c * shade)) for c in ORANGE)
-        if lambert[i] > 0.93:  # specular kiss on bright faces
-            col = tuple(min(255, int(round(c * 1.12))) for c in ORANGE_HI)
+        col = tuple(int(round(c * shade)) for c in MATERIAL)
+        if lambert[i] > 0.9:  # specular kiss on bright faces
+            col = tuple(min(255, int(round(c * 1.06))) for c in MATERIAL_HI)
         d.polygon(pts, fill=col)
         dmask.polygon(pts, fill=255)
 
@@ -254,7 +262,16 @@ def main():
     ap.add_argument("--cap", type=int, default=12000,
                     help="max triangles per frame (decimate larger meshes)")
     ap.add_argument("--no-reticle", action="store_true")
+    ap.add_argument("--color", default=None, metavar="#RRGGBB",
+                    help="material color override (default: warm PLA white)")
     args = ap.parse_args()
+
+    if args.color:
+        h = args.color.lstrip("#")
+        rgb = tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+        global MATERIAL, MATERIAL_HI
+        MATERIAL = rgb
+        MATERIAL_HI = tuple(min(255, int(c * 1.08)) for c in rgb)
 
     t0 = time.time()
     tris = load_stl(args.model)

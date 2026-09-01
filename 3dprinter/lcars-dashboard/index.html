@@ -217,7 +217,7 @@
 "use strict";
 const $ = id => document.getElementById(id);
 const state = { watching:false, statusTimer:null, filesTimer:null,
-                lastStatus:null, snapshot:false, lastFile:null };
+                lastStatus:null, snapshot:false, lastFile:null, lastGif:null };
 
 /* ---------- stardate ---------- */
 function stardate(){
@@ -280,27 +280,34 @@ function updatePreview(st){
     ph.style.display = "";
     ph.textContent = printing ? "AWAITING PRINT FILE" : "NO ACTIVE PRINT";
     name.textContent = "—";
-    state.lastFile = null;
+    state.lastFile = null; state.lastGif = null;
     return;
   }
   name.textContent = file;
-  if(state.lastFile === file) return;  // already projecting this file
   state.lastFile = file;
-  img.style.display = "none";
-  ph.style.display = "";
-  ph.textContent = "COMPUTING PROJECTION…";
+  // cheap JSON — polled each status tick while printing; swaps only when the
+  // render URL changes (model or renderer version), so a fresh render is
+  // picked up without a page reload
   fetch("/api/preview?file=" + encodeURIComponent(file), {cache:"no-store"})
     .then(r => r.json())
     .then(d => {
       if(!d.ok){
-        ph.style.display = ""; ph.textContent = "NO MODEL ON FILE";
-        img.style.display = "none"; img.src = "";
+        if(state.lastGif){
+          img.style.display = "none"; img.src = "";
+          ph.style.display = ""; ph.textContent = "NO MODEL ON FILE";
+          state.lastGif = null;
+        }
         return;
       }
-      img.src = d.gif; img.style.display = "";
-      ph.style.display = "none";
+      if(state.lastGif === d.gif) return;  // already projecting this version
+      state.lastGif = d.gif;
+      img.style.display = "none";
+      ph.style.display = ""; ph.textContent = "COMPUTING PROJECTION…";
+      img.onload = () => { img.style.display = ""; ph.style.display = "none"; };
+      img.onerror = () => { ph.style.display = ""; ph.textContent = "PROJECTION UNAVAILABLE"; };
+      img.src = d.gif;
     })
-    .catch(() => { ph.style.display = ""; ph.textContent = "PROJECTION UNAVAILABLE"; });
+    .catch(() => { if(!state.lastGif){ ph.style.display = ""; ph.textContent = "PROJECTION UNAVAILABLE"; } });
 }
 
 function renderFiles(data){
@@ -348,7 +355,7 @@ function standDown(){
   $("btnLive").disabled = true;
   $("camph").style.display = "";
   $("lastupd").textContent = "feed closed — press ENGAGE to open hailing frequencies";
-  state.lastFile = null;
+  state.lastFile = null; state.lastGif = null;
   $("previmg").style.display = "none"; $("previmg").src = "";
   $("prevph").style.display = ""; $("prevph").textContent = "NO ACTIVE PRINT";
   $("prevname").textContent = "—";

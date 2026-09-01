@@ -66,6 +66,8 @@ import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+import preview  # Replicator Preview renderer (numpy + Pillow)
+
 STATE = os.environ.get("3DPRINTER_STATE", "state.json")
 PORT = int(os.environ.get("PORT", "8890"))
 # Bind 0.0.0.0 so Docker port mappings work; restrict externally with a
@@ -142,9 +144,14 @@ def resolve_preview(gcode_name):
 
 
 def preview_gif(stem, stl_path):
-    """Generate (or fetch cached) preview GIF for a model. Returns abs path."""
+    """Generate (or fetch cached) preview GIF for a model. Returns abs path.
+
+    Cache filename carries RENDER_VERSION so a renderer change produces a new
+    URL instead of serving a stale GIF to browsers (which cache image URLs).
+    """
     os.makedirs(PREVIEW_CACHE_DIR, exist_ok=True)
-    cache = os.path.join(PREVIEW_CACHE_DIR, stem + ".gif")
+    ver = getattr(preview, "RENDER_VERSION", 1)
+    cache = os.path.join(PREVIEW_CACHE_DIR, f"{stem}_v{ver}.gif")
     if os.path.exists(cache):
         return cache
     with _PREVIEW_GEN_LOCKS_GUARD:
@@ -152,7 +159,6 @@ def preview_gif(stem, stl_path):
     with lock:
         if os.path.exists(cache):
             return cache
-        import preview
         tris = preview.load_stl(stl_path)
         preview.make_gif(tris, cache, size=PREVIEW_SIZE,
                          frames=PREVIEW_FRAMES, fps=PREVIEW_FPS,
@@ -508,15 +514,25 @@ class Handler(BaseHTTPRequestHandler):
         if not res:
             self._json({"ok": False, "error": "no_model"}, 404)
             return
+        ver = getattr(preview, "RENDER_VERSION", 1)
         self._json({"ok": True, "name": res["name"],
-                    "gif": "/preview/" + res["key"] + ".gif"})
+                    "gif": f"/preview/{res['key']}_v{ver}.gif"})
 
     def _serve_preview(self, path):
         key = path[len("/preview/"):]
         if not key.endswith(".gif"):
             self._send(404, b"not found", "text/plain")
             return
-        stem = key[:-4]
+        body = key[:-4]  # strip .gif
+        # expected shape: <stem>_v<N> — versioned so stale renders never linger
+        if "_v" not in body:
+            self._send(404, b"stale preview URL - refetch /api/preview",
+                       "text/plain")
+            return
+        stem, _, ver = body.rpartition("_v")
+        if ver != str(getattr(preview, "RENDER_VERSION", 1)) or not stem:
+            self._send(404, b"stale preview version", "text/plain")
+            return
         stl = _model_index().get(stem)
         if not stl:
             self._send(404, b"no model", "text/plain")
