@@ -24,6 +24,7 @@ from PIL import Image, ImageDraw
 BG      = (7, 7, 10)
 ORANGE  = (255, 156, 0)
 ORANGE_HI = (255, 190, 80)
+EDGE    = (190, 115, 10)   # silhouette outline — darker than fill, reads as edges
 TEAL    = (102, 204, 204)
 PLATE_FILL = (14, 26, 34)
 SHADOW  = (0, 0, 0)
@@ -111,7 +112,7 @@ def clip_poly_near(pts3, cam, w, near):
 
 def frame_image(tris, normals, lo, hi, center, radius, theta, tilt_deg,
                 size, f, light, reticle, plate_z, plate_radius,
-                near_scale=0.15):
+                near_scale=0.15, outline=True):
     """Render one frame (PIL Image, RGB)."""
     tilt = np.radians(tilt_deg)
     near = max(radius * 0.15, 0.05)
@@ -159,8 +160,14 @@ def frame_image(tris, normals, lo, hi, center, radius, theta, tilt_deg,
     lambert = np.clip(normals @ light, 0.0, 1.0)
     # fill light from the camera direction — keeps camera-facing faces readable
     viewdot = np.clip(np.sum((view / vn[:, None]) * normals, axis=1), 0.0, 1.0)
-    bright = np.clip(0.32 + 0.62 * lambert + 0.22 * viewdot, 0.0, 1.0)
+    # solid-object shading: high ambient so no face falls to background, plus
+    # gentle depth fog for volume
+    dmin, dmax = depth.min(), depth.max()
+    fog = 1.0 - 0.18 * ((depth - dmin) / max(dmax - dmin, 1e-9))
+    bright = np.clip(0.45 + 0.50 * lambert + 0.20 * viewdot, 0.0, 1.0) * fog
 
+    img_mask = Image.new("L", (size, size), 0)
+    dmask = ImageDraw.Draw(img_mask)
     for i in order:
         if not facing[i]:
             continue
@@ -175,6 +182,17 @@ def frame_image(tris, normals, lo, hi, center, radius, theta, tilt_deg,
         if lambert[i] > 0.93:  # specular kiss on bright faces
             col = tuple(min(255, int(round(c * 1.12))) for c in ORANGE_HI)
         d.polygon(pts, fill=col)
+        dmask.polygon(pts, fill=255)
+
+    # ---- silhouette outline: true projected boundary, gives the part edges ----
+    if outline:
+        a = np.asarray(img_mask)
+        shifted = np.stack([a] + [np.roll(a, s, axis=(0, 1)) for s in
+                                  ((1, 0), (-1, 0), (0, 1), (0, -1))])
+        edge = (a > 0) & (shifted.min(axis=0) == 0)
+        arr = np.array(img, copy=True)
+        arr[edge] = EDGE
+        img = Image.fromarray(arr)
 
     # ---- reticle (decorative overlay, screen-space) ----
     if reticle:
@@ -194,8 +212,8 @@ def frame_image(tris, normals, lo, hi, center, radius, theta, tilt_deg,
     return img
 
 
-def make_gif(tris, out, size=360, frames=36, fps=12, tilt=28, cap=12000,
-             reticle=True):
+def make_gif(tris, out, size=360, frames=36, fps=9, tilt=28, cap=12000,
+             reticle=True, outline=True):
     tris = decimate(tris, cap)
     normals = np.cross(tris[:, 1] - tris[:, 0], tris[:, 2] - tris[:, 0])
     nlen = np.linalg.norm(normals, axis=1)
@@ -218,7 +236,7 @@ def make_gif(tris, out, size=360, frames=36, fps=12, tilt=28, cap=12000,
         theta = 2 * np.pi * fr / frames + np.radians(-30)
         imgs.append(frame_image(tris, normals, lo, hi, center, radius, theta,
                                 tilt, size, f, light, reticle, plate_z,
-                                plate_radius))
+                                plate_radius, outline=outline))
     imgs[0].save(out, save_all=True, append_images=imgs[1:], duration=1000 / fps,
                  loop=0, optimize=True, disposal=2)
     return len(imgs)
@@ -230,7 +248,8 @@ def main():
     ap.add_argument("out")
     ap.add_argument("--size", type=int, default=360)
     ap.add_argument("--frames", type=int, default=36)
-    ap.add_argument("--fps", type=int, default=12)
+    ap.add_argument("--fps", type=float, default=9,
+                    help="GIF playback speed (default 9 = ~4s per rotation)")
     ap.add_argument("--tilt", type=float, default=28)
     ap.add_argument("--cap", type=int, default=12000,
                     help="max triangles per frame (decimate larger meshes)")
