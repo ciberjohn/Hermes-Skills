@@ -222,4 +222,9 @@ All scripts read the state file from `{{STATE_FILE}}` (or `$3DPRINTER_STATE`).
 
 - Slice test: `slice.py test_cube.stl --material PLA --json` → `bed_verified: true`,
   temps `M190 S65` / `M140 S62`, nozzle 210/215.
+- Rotating preview GIF (dashboard "Replicator Preview"): `python3
+  lcars-dashboard/preview.py model.stl out.gif` → ≥24 frames, loop 0. The
+  dashboard's `/api/preview?file=<gcode>` resolves a printing gcode name to a
+  local STL and `/preview/<stem>.gif` serves a cached rotating GIF — see
+  `lcars-dashboard/README.md` for endpoints and env vars.
 - Printer: `ff_print.py status` → file count (TCP fallback works even when HTTP is down).
