@@ -12,10 +12,18 @@ Options:
                    (default: Spock Quality 0.20 @FF AD5X.json)
   --name NAME      output gcode name (default: <model>_<MATERIAL>)
   --json           machine-readable output
+  --no-thumbnail   skip embedding the 140x110 LCD preview PNG
 
 Pipeline: slice with OrcaSlicer CLI -> post-process bed temps (OrcaSlicer 2.4.2
 AD5X quirk ignores filament bed keys; values come from the SOP material table)
--> verify temps -> report.
+-> embed LCD thumbnail PNG (headless OrcaSlicer writes the `; thumbnails`
+config line but never the image bytes; gcode_thumbnail.py renders and injects
+them so the printer LCD shows the object preview) -> verify temps -> report.
+
+Profiles MUST be materialized (materialize_profiles.py): headless CLI does not
+resolve `inherits` chains, so speed/accel/volumetric keys would silently fall
+back to Orca's generic slow defaults (outer 60 vs vendor 200 mm/s, volumetric
+2 vs 25 mm³/s). Slice with the baked profiles in profiles_dir.
 """
 import argparse
 import json
@@ -140,6 +148,8 @@ def main():
     ap.add_argument("--bed", default=None, help="bed temps INITIAL,NORMAL, e.g. 70,65 (default from SOP table)")
     ap.add_argument("--name", default=None)
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--no-thumbnail", action="store_true",
+                    help="skip embedding the 140x110 LCD preview PNG (default: embed)")
     args = ap.parse_args()
 
     st = load_state()
@@ -213,20 +223,39 @@ def main():
                 f"override mechanism; do NOT print this gcode."
             )
 
-    # --- Post-process: bed temps (OrcaSlicer 2.4.2 AD5X quirk) ---
+    # --- Post-process: bed temps (OrcaSlicer 2.4.2 AD5X quirk: filament bed
+    # keys are ignored and the emitted value comes from elsewhere in the merged
+    # profile — was S35 pre-materialization, S55/S60 after baking. Never ship
+    # those; pin every M190/M140 to the SOP table (bed temp is constant). ---
     bed_init, bed_norm = BED_TEMP[mat]["initial"], BED_TEMP[mat]["normal"]
     if args.bed:
         try:
             bed_init, bed_norm = [int(x.strip()) for x in args.bed.split(",")]
         except ValueError:
             sys.exit("--bed must be INITIAL,NORMAL e.g. 70,65")
-    data = data.replace("M190 S35", f"M190 S{bed_init}")
-    data = data.replace("M140 S35", f"M140 S{bed_norm}")
+    data = re.sub(r"M190 S\d+", f"M190 S{bed_init}", data)
+    data = re.sub(r"M140 S\d+", f"M140 S{bed_norm}", data)
 
     # --- Nozzle temp override (keeps the PETG-safe 245C purge untouched) ---
     if args.nozzle is not None:
         data = re.sub(r"M104 S215", f"M104 S{args.nozzle}", data)
         data = re.sub(r"M109 S215", f"M109 S{args.nozzle}", data)
+
+    # --- LCD thumbnail embed (headless OrcaSlicer never writes the PNG bytes;
+    # gcode_thumbnail.py renders the model iso-view and injects the block the
+    # AD5X firmware parses). Cosmetic only; skip with --no-thumbnail. ---
+    thumbnail = False
+    if not args.no_thumbnail:
+        try:
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            from gcode_thumbnail import thumbnail_block_for_stl
+            block = thumbnail_block_for_stl(args.model)
+            if block:
+                data = block + data
+                thumbnail = True
+        except Exception as e:  # render failure must never block a slice
+            print(f"WARNING: thumbnail embed failed ({e}) — continuing without it",
+                  file=sys.stderr)
 
     # --- Sanitize output name (path traversal guard) ---
     raw_name = args.name or os.path.splitext(os.path.basename(args.model))[0]
@@ -253,6 +282,7 @@ def main():
         "layers": int(layers_n.group(1)) if layers_n else None,
         "est_minutes": int(time_m.group(1)) if time_m else None,
         "bed_verified": ok,
+        "thumbnail": thumbnail,
         "base_mm2": base_mm2,
     }
 
@@ -266,6 +296,7 @@ def main():
         print(f"layers: {info['layers']}")
         print(f"est time: {info['est_minutes']} min")
         print(f"bed temps verified: {ok}")
+        print(f"LCD thumbnail embedded: {thumbnail}")
 
     shutil.rmtree(outdir, ignore_errors=True)
     sys.exit(0 if ok else 2)

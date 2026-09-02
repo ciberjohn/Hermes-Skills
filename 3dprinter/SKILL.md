@@ -51,6 +51,17 @@ Set these before running the pipeline, or answer the install prompt and let your
    quality and fast process profiles) next to your OrcaSlicer profile
    collection, and point `{{ORCA_MACHINE_PROFILE}}` at the
    "Flashforge AD5X 0.4 nozzle" machine profile that ships with OrcaSlicer.
+   The bundled profiles are **materialized** (self-contained). After any edit,
+   regenerate them with:
+   ```bash
+   python3 scripts/materialize_profiles.py \
+     --profiles-dir <dir with your profile JSONs> \
+     --orca-resources <OrcaSlicer resources/profiles dir> \
+     --output <extra copy dirs...>
+   ```
+   (See the "CLI ignores `inherits`" pitfall — without baking, headless slices
+   silently fall back to Orca's generic slow defaults: walls 60 mm/s and a
+   2 mm³/s volumetric cap instead of 200 mm/s and 25.)
 4. Create `{{STATE_FILE}}` (default `~/3dprinter/state.json`; override with the
    `3DPRINTER_STATE` env var). The variables map into it like this:
    - `{{PRINTER_IP}}`, `{{PRINTER_SERIAL}}`, `{{PRINTER_CHECK_CODE}}` →
@@ -81,10 +92,13 @@ Set these before running the pipeline, or answer the install prompt and let your
    decorative / functional / prototype; supports on/off; quantity.
 4. **Slice**:
    ```bash
-   python3 scripts/slice.py model.stl --material PLA [--name foo] [--profile "Spock Fast 0.24 @FF AD5X.json"] [--supports none] [--infill 10] [--layer 0.24]
+   python3 scripts/slice.py model.stl --material PLA [--name foo] [--profile "Spock Fast 0.24 @FF AD5X.json"] [--supports none] [--infill 10] [--layer 0.24] [--no-thumbnail]
    ```
    → gcode at `<output_dir>/<name>_<MATERIAL>.gcode` plus est. time, layers and
    `bed_verified` (the script fixes the OrcaSlicer bed-temp quirk and verifies).
+   slice.py also embeds a **140x110 LCD thumbnail PNG** by default (headless
+   OrcaSlicer never writes the image bytes itself — see pitfall); disable with
+   `--no-thumbnail`.
 5. **Report** — est time, material, layer count; ask **confirm to upload/print**
    (default: upload + confirm before starting; bed must be clear, filament loaded).
 6. **Upload/start**:
@@ -150,7 +164,9 @@ G92 E0 … normal purge line at print temp
 
 ## Scripts
 
-- `scripts/slice.py` — headless slice + bed-temp fix + verification
+- `scripts/slice.py` — headless slice + bed-temp fix + LCD thumbnail embed + verification
+- `scripts/gcode_thumbnail.py` — render/inject the 140x110 LCD preview PNG (used by slice.py)
+- `scripts/materialize_profiles.py` — bake vendor `inherits` chains into the profile JSONs
 - `scripts/ff_print.py` — status / list / upload / cancel via flashforge-python-api
 - `scripts/channels.py` — material station inventory (show / set / clear)
 
@@ -159,9 +175,29 @@ All scripts read the state file from `{{STATE_FILE}}` (or `$3DPRINTER_STATE`).
 ## Pitfalls
 
 - **OrcaSlicer 2.4.2 AD5X bed-temp quirk**: filament `bed_temperature*` keys can
-  be ignored on this machine (gcode emits `M190/M140 S35`). `slice.py`
-  post-processes bed temps from the material table and verifies — never ship
-  gcode with a 35°C bed. Verify: `grep -oE "M1(90|40) S[0-9]+" file.gcode`.
+  be ignored on this machine (gcode emitted `M190/M140 S35` pre-materialization,
+  `S55/S60` after baking). `slice.py` pins EVERY `M190`/`M140` from the material
+  table (regex, not literal S35) and verifies — never ship gcode with the wrong
+  bed temp. Verify: `grep -oE "M1(90|40) S[0-9]+" file.gcode`.
+- **Headless CLI does NOT resolve profile `inherits` — silent speed collapse
+  (2026-09-02)**: the GUI resolves a profile's `inherits` chain; the CLI does
+  NOT, and falls back to Orca's generic defaults: outer/inner walls **60 mm/s**,
+  infill/top **100**, travel **120**, accel 500, and — worst of all —
+  `filament_max_volumetric_speed = 2` mm³/s which throttled ALL extrusion to
+  ~22 mm/s regardless of profile speeds. Vendor-intended AD5X values: outer
+  **200** / inner **300** / infill **270** / travel **500** mm/s, accel
+  5000–10000, volumetric cap **25** (PLA) / 12 (PETG). FIX: materialize the
+  profiles (see Setup) and re-run after every profile edit. ALWAYS verify a new
+  slice: `grep -m1 '^; outer_wall_speed' x.gcode` → `200`,
+  `grep -m1 '^; filament_max_volumetric_speed' x.gcode` → `25`.
+- **Headless CLI never embeds the LCD thumbnail PNG**: the gcode carries
+  `; thumbnails = 140x110/PNG` but zero image bytes (`; thumbnail begin` /
+  iVBOR absent) because thumbnail rendering happens in the GUI export path — so
+  the printer LCD shows no object preview. FIX (2026-09-02): `slice.py` injects
+  a rendered 140x110 iso PNG (via `scripts/gcode_thumbnail.py`, mesh iso view;
+  PIL fast path, pure-numpy fallback) at the top of the file in the standard
+  Orca/Prusa comment format. Verify: `grep -c '^; thumbnail begin' x.gcode` ≥ 1.
+  Cosmetic only.
 - **HTTP API (8898) requires LAN mode**: if all HTTP requests get empty replies
   while TCP 8899 works, the printer is not in **LAN mode** (touchscreen
   Settings → Network) — enable it and reboot. LAN mode disables the vendor
@@ -232,7 +268,13 @@ All scripts read the state file from `{{STATE_FILE}}` (or `$3DPRINTER_STATE`).
 ## Verification
 
 - Slice test: `slice.py test_cube.stl --material PLA --json` → `bed_verified: true`,
-  temps `M190 S65` / `M140 S62`, nozzle 210/215.
+  temps `M190 S65` / `M140 S62`, nozzle 210/215, `thumbnail: true`.
+- Speed/flow sanity on any new gcode:
+  `grep -m1 '^; outer_wall_speed' x.gcode` → 200,
+  `grep -m1 '^; sparse_infill_speed' x.gcode` → 270,
+  `grep -m1 '^; filament_max_volumetric_speed' x.gcode` → 25 (PLA) / 12 (PETG).
+  If any show 60 / 100 / 2 the profile regressed — re-run materialize_profiles.py.
+- Thumbnail presence: `grep -c '^; thumbnail begin' x.gcode` → ≥ 1 (cosmetic).
 - Rotating preview GIF (dashboard "Replicator Preview"): `python3
   lcars-dashboard/preview.py model.stl out.gif` → ≥24 frames, loop 0. The
   dashboard's `/api/preview?file=<gcode>` resolves a printing gcode name to a
