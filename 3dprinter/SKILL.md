@@ -217,6 +217,17 @@ All scripts read the state file from `{{STATE_FILE}}` (or `$3DPRINTER_STATE`).
   flat base often arrive rotated 90° — check min/max extents per axis and
   rotate so the flat face is down. Render previews with
   `scripts/stl_preview.py model.stl outprefix` before confirming the slice.
+- **MULTI-PART PLATES: raft expansion fuses adjacent parts — space parts for
+  the raft, not the bounding box** (2026-09-01 incident: 4 Hook + 4 Assembly
+  plate printed fused; the bonded pieces were scrapped — cuts would look bad).
+  Root cause: raft `first_layer_expansion = 2.0` / `expansion = 1.5` grows the
+  raft ~2 mm past EVERY part edge, so parts spaced ~4 mm apart (bbox to bbox)
+  get their rafts merged into ONE continuous sheet; the gcode's first raft
+  layer showed a single uninterrupted span across the whole bed. RULE: min
+  bbox-to-bbox spacing = `2 × raft_first_layer_expansion + margin` = **8 mm**
+  when raft is on. Verify after slicing: the first raft layer (lowest Z) must
+  show GAPS between islands; a continuous raft span = parts will fuse — pack
+  wider. Tree-support bases can bridge tight gaps the same way.
 
 ## Verification
 
