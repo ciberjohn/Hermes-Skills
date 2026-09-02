@@ -4,6 +4,7 @@
 Usage:
   ff_print.py status
   ff_print.py list [--tail N]
+  ff_print.py speed [N]        # set print speed override % (e.g. 150) or query current
   ff_print.py upload <gcode-file> [--start]
   ff_print.py cancel --yes
 
@@ -63,6 +64,26 @@ async def cmd_list(st, tail):
         await c.dispose()
 
 
+async def cmd_speed(st, value):
+    c = await _connect(st)
+    try:
+        await c.init_control()
+        if value is not None:
+            ok = await c.control.set_speed_override(value)
+            print(f"speed override set: {value}% -> {'OK' if ok else 'FAILED'}")
+        try:
+            info = await c.info.get_detail_response()
+            d = info.detail if hasattr(info, "detail") else info
+            speed = getattr(d, "print_speed_adjust", getattr(d, "current_print_speed", "?"))
+            print(f"current print_speed_adjust: {speed}")
+            state = await c.get_printer_status()
+            print("status:", getattr(state, "machine_state", state))
+        except Exception as e:
+            print("detail read (TCP):", e)
+    finally:
+        await c.dispose()
+
+
 async def cmd_upload(st, gcode, start):
     if not os.path.exists(gcode):
         sys.exit(f"gcode not found: {gcode}")
@@ -87,7 +108,7 @@ async def cmd_cancel(st):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["status", "list", "upload", "cancel"])
+    ap.add_argument("cmd", choices=["status", "list", "speed", "upload", "cancel"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--start", action="store_true", help="start printing immediately after upload")
     ap.add_argument("--yes", action="store_true", help="required to confirm cancel")
@@ -104,6 +125,13 @@ def main():
         asyncio.run(cmd_status(st))
     elif a.cmd == "list":
         asyncio.run(cmd_list(st, a.tail))
+    elif a.cmd == "speed":
+        value = None
+        if a.arg:
+            value = int(a.arg)
+            if not 10 <= value <= 500:
+                sys.exit("speed must be 10..500 percent")
+        asyncio.run(cmd_speed(st, value))
     elif a.cmd == "upload":
         asyncio.run(cmd_upload(st, a.arg, a.start))
     elif a.cmd == "cancel":

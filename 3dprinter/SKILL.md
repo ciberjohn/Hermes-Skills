@@ -167,7 +167,7 @@ G92 E0 … normal purge line at print temp
 - `scripts/slice.py` — headless slice + bed-temp fix + LCD thumbnail embed + verification
 - `scripts/gcode_thumbnail.py` — render/inject the 140x110 LCD preview PNG (used by slice.py)
 - `scripts/materialize_profiles.py` — bake vendor `inherits` chains into the profile JSONs
-- `scripts/ff_print.py` — status / list / upload / cancel via flashforge-python-api
+- `scripts/ff_print.py` — status / list / **speed [N]** (set print-speed override %, e.g. 150, or query) / upload / cancel via flashforge-python-api
 - `scripts/channels.py` — material station inventory (show / set / clear)
 
 All scripts read the state file from `{{STATE_FILE}}` (or `$3DPRINTER_STATE`).
