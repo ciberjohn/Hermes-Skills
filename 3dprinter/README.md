@@ -19,6 +19,10 @@ printer's LAN API.
 - **CHANNELS** — material station inventory (4 slots: material/color/brand/
   remaining) kept in a state file; the agent confirms the current loadout at
   print time instead of assuming.
+- **DESIGN FIRST?** — want a part modeled, not just an existing STL sliced?
+  Sibling skill [`openscad-cad`](../openscad-cad/) turns a sketch / photo /
+  spoken dimensions into a parametric STL (OpenSCAD), then this skill takes
+  over for slicing and printing.
 
 ## Quick Install
 

@@ -26,6 +26,7 @@ Once installed, the skill is available as a slash command (`/medium-story`, `/sh
 | [openrouter-image-gen](openrouter-image-gen/) | Generates images via the OpenRouter API — cheap models, no GPU. Walks the embedded-JSON response for the image, vision-verifies the result, and ships a recurring-character spec for consistent series art | Generate → verify → save PNG | `/openrouter-image-gen [prompt]` |
 | [ai-projects](ai-projects/) | Syncs a Git repository of AI projects to a local directory | Clone → pull → status report | `/ai-projects [action]` |
 | [3dprinter](3dprinter/) | Slices STL/3MF files headlessly with OrcaSlicer for a Flashforge AD5X and drives the printer's LAN API — material-station asks, SOP-tuned profiles, bed-temp verification, upload/print | Slice → verify temps → confirm channels → upload → print | `"print this STL"` |
+| [openscad-cad](openscad-cad/) | DESIGN stage of 3D printing: turns a sketch, annotated photo, or spoken dimensions into a parametric OpenSCAD model and a verified binary STL, then hands off to 3dprinter for slicing | Sketch/dims → parametric .scad → render STL → verify (manifold, envelope, preview) → hand off to slice | `"design me a bracket 40x25x12"` |
 | [t3mp3st-autonomous-security](t3mp3st-autonomous-security/) | Autonomous security ops — installs T3MP3ST for recon, scanning, CVE hunting, and kill-chain ops with an LLM-driven AI agent | Setup → verify → configure scope → autonomous hunting → fleet assessment | `/t3mp3st-autonomous-security [target]` |
 | [social-poster](social-poster/) | Direct OAuth social media posting — no Docker, no database. Generate URLs, exchange PINs/codes, store tokens, and post via direct API calls | OAuth → token vault → post → schedule | `"post this to X"` |
 | [uk-business-consultant](uk-business-consultant/) | UK business consultant — two-mode framework for side hustles (£500–£2k/mo) and full-time ventures (£3k–£8k/mo). Includes viability scorecard, financial modelling, UK tax/regs, low-cost marketing playbook | Understand → Scorecard → Model → Recommend → Deliver | `/uk-business-consultant [goal]` |
@@ -101,6 +102,7 @@ Hermes-Skills/
 ├── openrouter-image-gen/     # Image generation via OpenRouter API
 ├── ai-projects/              # Repository sync
 ├── 3dprinter/                # Flashforge AD5X headless slicing + printing
+├── openscad-cad/             # Parametric design: sketch/dims → OpenSCAD → STL
 ├── t3mp3st-autonomous-security/ # Autonomous security ops
 ├── social-poster/               # Direct OAuth social media posting
 ├── technical-trainer/           # Course creation pipeline

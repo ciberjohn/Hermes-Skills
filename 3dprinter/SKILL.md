@@ -31,6 +31,9 @@ Set these before running the pipeline, or answer the install prompt and let your
 
 ## Trigger conditions
 
+0. User wants an object **designed** (sketch / annotated photo / spoken
+   dimensions) → that is the DESIGN stage: sibling skill `openscad-cad`
+   (parametric OpenSCAD → STL). Return here once an STL exists.
 1. User sends an **STL / 3MF / OBJ** file → run the slice workflow.
 2. User asks "can you print X?" or references a model → same workflow.
 3. User asks about printer status, material station, or what's loaded → status/channels.
@@ -281,3 +284,10 @@ All scripts read the state file from `{{STATE_FILE}}` (or `$3DPRINTER_STATE`).
   local STL and `/preview/<stem>.gif` serves a cached rotating GIF — see
   `lcars-dashboard/README.md` for endpoints and env vars.
 - Printer: `ff_print.py status` → file count (TCP fallback works even when HTTP is down).
+
+## Sibling skills (same 3dprinting category)
+
+- `openscad-cad` — DESIGN stage: turn a sketch / photo / spoken dimensions into
+  a parametrically-coded, verified STL with OpenSCAD, then hand off here.
+- `multipart-stl-plates` — multi-shell STLs (Bambu/MakerWorld plates), plate
+  packing for the 220 mm bed, binary-STL read/write, Orca plate-rejection codes.

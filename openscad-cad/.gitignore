@@ -1,0 +1,18 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment and secrets
+.env
+.env.*
+secrets/
+credentials/
+
+# Generated output (renders live in the workspace, not the skill)
+*.gcode
+*.3mf
+
+# OS files
+.DS_Store
+Thumbs.db
