@@ -1,6 +1,6 @@
-# GymCoach
+# GymCoach — Personal Fitness Coach
 
-Personal fitness coach — Hermes Agent skill. Launches a tmux-based coaching session tailored to a beginner (sedentary, low flexibility, 50+).
+A Hermes Agent skill that turns your agent into a personal gym coach for a sedentary beginner (50+, low flexibility). Coaching happens via **Discord** — share gym photos, get progressive plans, track sessions. No tmux or terminal needed.
 
 ## Structure
 
@@ -16,23 +16,19 @@ gymcoach/
    ```bash
    cp -r gymcoach ~/.hermes/profiles/<your-profile>/skills/
    ```
-2. Create the project workspace:
+2. Create the project workspace on your server:
    ```bash
    mkdir -p ~/gymcoach/{data,plans,photos}
    ```
 3. Create your personal profile in `~/gymcoach/data/user-profile.md` (see SKILL.md for template)
-4. Create a Hermes project:
+4. Invite your agent to a private Discord channel and load the skill:
    ```bash
-   hermes project create GymCoach ~/gymcoach
-   ```
-5. Load the skill:
-   ```bash
-   hermes chat --skills gymcoach --in ~/gymcoach
+   hermes chat --skills gymcoach
    ```
 
 ## Usage
 
-Say **"gymcoach"** to invoke — the coach will analyse gym photos, build progressive plans, and track sessions. The tmux session persists so you can reconnect from Hermes Desktop or SSH.
+Share gym photos in the Discord channel — the coach analyses equipment, builds a Phase 1 plan, and tracks every session. Three phases: Mobility & Foundation (weeks 1-4) → Strength Entry (5-8) → Consolidation (9+).
 
 ## License
 

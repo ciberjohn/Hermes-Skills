@@ -48,38 +48,54 @@ def post_x(text, vault, config):
     import base64, hmac, hashlib, time
     ck, cs = config["x"]["api_key"], config["x"]["api_secret"]
     nonce = base64.b64encode(os.urandom(16)).decode()[:32]
-    params = {
+    # RFC 5849 percent-encoding: encode everything except unreserved chars.
+    def enc(s):
+        return urllib.parse.quote(str(s), safe="-._~")
+    oauth = {
         "oauth_consumer_key": ck, "oauth_nonce": nonce,
         "oauth_signature_method": "HMAC-SHA1", "oauth_timestamp": str(int(time.time())),
-        "oauth_token": tok, "oauth_version": "1.0", "status": text
+        "oauth_token": tok, "oauth_version": "1.0",
     }
-    ps = "&".join(f"{urllib.parse.quote(k)}={urllib.parse.quote(v)}" for k,v in sorted(params.items()))
-    base = f"POST&{urllib.parse.quote('https://api.twitter.com/2/tweets')}&{urllib.parse.quote(ps)}"
-    key = f"{urllib.parse.quote(cs)}&{urllib.parse.quote(sec)}"
-    sig = base64.b64encode(hmac.new(key.encode(), base.encode(), hashlib.sha1).digest()).decode()
-    params["oauth_signature"] = sig
-    auth = "OAuth " + ", ".join(f'{k}="{urllib.parse.quote(v)}"' for k,v in sorted(params.items()) if k != "status")
     body = json.dumps({"text": text}).encode()
-    r = fetch("https://api.twitter.com/2/tweets", method="POST", data=body,
+    # Twitter v2 + OAuth 1.0a with a JSON body requires the body to be signed.
+    # oauthlib (and requests-oauthlib) do this via an oauth_body_hash parameter
+    # (draft-eaton-oauth-bodyhash-00); without it the API rejects with 401.
+    oauth["oauth_body_hash"] = base64.b64encode(hashlib.sha1(body).digest()).decode()
+    pairs = [(enc(k), enc(v)) for k, v in sorted(oauth.items())]
+    ps = "&".join(f"{k}={v}" for k, v in pairs)
+    url = "https://api.twitter.com/2/tweets"
+    base = "&".join([enc("POST"), enc(url), enc(ps)])
+    key = f"{enc(cs)}&{enc(sec)}"
+    sig = base64.b64encode(hmac.new(key.encode(), base.encode(), hashlib.sha1).digest()).decode()
+    oauth["oauth_signature"] = sig
+    auth = "OAuth " + ", ".join(f'{enc(k)}="{enc(v)}"' for k, v in sorted(oauth.items()))
+    r = fetch(url, method="POST", data=body,
               headers={"Authorization": auth, "Content-Type": "application/json"})
-    return r.get("data", {}).get("id", f"Result: {r}")
+    if isinstance(r, dict) and r.get("data", {}).get("id"):
+        return r["data"]["id"]
+    return f"Result: {r}"
 
-def post_linkedin(text, vault):
+def post_linkedin(text, vault, link=None):
     tok = vault.get("linkedin", {}).get("access_token", "")
     if not tok: return "No LinkedIn token"
     # Get profile URN
     prof = fetch("https://api.linkedin.com/v2/userinfo", headers={"Authorization": f"Bearer {tok}"})
     sub = prof.get("sub", "")
     if not sub: return f"Cannot get profile: {prof}"
+    # When a link is provided, use ARTICLE category so LinkedIn crawls the URL
+    # and renders a rich card with a thumbnail (OG image) instead of a bare URL.
+    if link:
+        share = {
+            "shareCommentary": {"text": text},
+            "shareMediaCategory": "ARTICLE",
+            "media": [{"status": "READY", "originalUrl": link}]
+        }
+    else:
+        share = {"shareCommentary": {"text": text}, "shareMediaCategory": "NONE"}
     body = {
         "author": f"urn:li:person:{sub}",
         "lifecycleState": "PUBLISHED",
-        "specificContent": {
-            "com.linkedin.ugc.ShareContent": {
-                "shareCommentary": {"text": text},
-                "shareMediaCategory": "NONE"
-            }
-        },
+        "specificContent": {"com.linkedin.ugc.ShareContent": share},
         "visibility": {"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"}
     }
     r = fetch("https://api.linkedin.com/v2/ugcPosts", method="POST",
@@ -88,12 +104,31 @@ def post_linkedin(text, vault):
                        "X-Restli-Protocol-Version": "2.0.0"})
     return r.get("id", f"Result: {r}")
 
+def _resolve_pds(vault):
+    """Resolve the PDS hosting the account's handle (accounts may not live on bsky.social)."""
+    h = vault.get("bluesky", {}).get("handle", "")
+    if not h:
+        return "https://bsky.social"
+    try:
+        r = fetch("https://bsky.social/xrpc/com.atproto.identity.resolveHandle?handle=" + urllib.parse.quote(h))
+        did = r.get("did", "") if isinstance(r, dict) else ""
+        if did:
+            doc = fetch(f"https://plc.directory/{did}")
+            if isinstance(doc, dict):
+                for s in doc.get("service", []):
+                    if s.get("id") == "#atproto_pds" and s.get("type") == "AtprotoPersonalDataServer":
+                        return s.get("serviceEndpoint", "https://bsky.social")
+    except Exception:
+        pass
+    return "https://bsky.social"
+
 def post_bluesky(text, vault):
     h = vault.get("bluesky", {}).get("handle", "")
     p = vault.get("bluesky", {}).get("app_password", "")
     if not h or not p: return "No Bluesky credentials"
+    pds = _resolve_pds(vault)
     # Create session
-    sess = fetch("https://bsky.social/xrpc/com.atproto.server.createSession", method="POST",
+    sess = fetch(f"{pds}/xrpc/com.atproto.server.createSession", method="POST",
                  data=json.dumps({"identifier": h, "password": p}).encode(),
                  headers={"Content-Type": "application/json"})
     token = sess.get("accessJwt", "")
@@ -107,7 +142,7 @@ def post_bluesky(text, vault):
             "text": text[:300], "createdAt": __import__("datetime").datetime.utcnow().isoformat() + "Z"
         }
     }
-    r = fetch("https://bsky.social/xrpc/com.atproto.repo.createRecord", method="POST",
+    r = fetch(f"{pds}/xrpc/com.atproto.repo.createRecord", method="POST",
               data=json.dumps(body).encode(),
               headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
     return r.get("uri", f"Result: {r}")
@@ -180,16 +215,20 @@ def main():
 
     vault = load_vault()
     config = load_config()
-    text = args.text
-    if args.link:
-        text = f"{text}\n\n{args.link}" if text else args.link
+    body = args.text
+    # LinkedIn takes the link separately (rendered as an ARTICLE card w/ thumbnail);
+    # other platforms get it appended to the text.
+    linkedin_link = args.link if "linkedin" in args.platforms.split(",") else ""
+    text = body
+    if args.link and "linkedin" not in args.platforms.split(","):
+        text = f"{body}\n\n{args.link}" if body else args.link
 
     platform_map = {
         "x": lambda t, v, c: post_x(t, v, c), "linkedin": post_linkedin, "bluesky": post_bluesky,
         "mastodon": post_mastodon, "twitch": lambda t, v, c: post_twitch(t, v, c), "reddit": post_reddit,
-        "discord": lambda t, v, c: post_discord(t, c), "slack": lambda t, v, c: post_slack(t, c),
-        "telegram": lambda t, v, c: post_telegram(t, c),
-        "github": lambda t, v, c: post_github(args.title, t, c),
+        "discord": lambda t, c: post_discord(t, c), "slack": lambda t, c: post_slack(t, c),
+        "telegram": lambda t, c: post_telegram(t, c),
+        "github": lambda t, c: post_github(args.title, t, c),
     }
 
     platforms = [pl.strip() for pl in args.platforms.split(",") if pl.strip()]
@@ -200,14 +239,23 @@ def main():
             results[pl] = "Unknown platform"
             continue
         try:
-            r = fn(text, vault, config) if pl in ("x", "mastodon", "twitch") else fn(text, vault) if pl not in ("discord", "slack", "telegram") else fn(text, config)
+            if pl == "linkedin":
+                r = post_linkedin(body, vault, linkedin_link)
+            elif pl in ("x", "mastodon", "twitch"):
+                r = fn(text, vault, config)
+            elif pl in ("discord", "slack", "telegram"):
+                r = fn(text, config)
+            else:
+                r = fn(text, vault)
             results[pl] = r
         except Exception as e:
             results[pl] = f"Error: {e}"
 
     for pl, result in results.items():
-        status = "✅" if result and "error" not in str(result).lower() else "❌"
-        print(f"  {status} {pl:12s} {str(result)[:100]}")
+        s = str(result)
+        failed = (not s) or s.startswith("Result:") or "error" in s.lower() or s.lower().startswith("no ")
+        status = "❌" if failed else "✅"
+        print(f"  {status} {pl:12s} {s[:100]}")
 
 if __name__ == "__main__":
     main()
