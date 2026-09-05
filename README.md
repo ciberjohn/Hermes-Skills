@@ -32,6 +32,7 @@ Once installed, the skill is available as a slash command (`/medium-story`, `/sh
 | [uk-business-consultant](uk-business-consultant/) | UK business consultant — two-mode framework for side hustles (£500–£2k/mo) and full-time ventures (£3k–£8k/mo). Includes viability scorecard, financial modelling, UK tax/regs, low-cost marketing playbook | Understand → Scorecard → Model → Recommend → Deliver | `/uk-business-consultant [goal]` |
 | [technical-trainer](technical-trainer/) | Full lifecycle technical course creation — AI and Linux courses in English (UK) and Portuguese (PT). Market research, fact-checked content, bilingual production, and B2B packaging via parallel sub-agents | 6 steps: Intake → Market Research → Curriculum Design → 4 parallel sub-agents (Fact Checker, Technical Writer, Translator, B2B Specialist) → Repository Assembly → Delivery | `"Create a course on [topic]"` |
 | [transcribe](transcribe/) | Local speech-to-text: transcribe audio (Dropbox links, uploads, URLs) with CrisperWhisper and commit verbatim + intended transcripts to a private GitHub repo — one dated folder per audio | Fetch → transcribe (verbatim + intended) → dated folder → git commit + push | `"transcribe this Dropbox link"` |
+| [gymcoach](gymcoach/) | Personal fitness coach for a beginner (sedentary, low flexibility, 50+). Launches tmux coaching session, analyses gym photos, builds progressive plans | tmux → photo analysis → phased plan → track | `"gymcoach"` |
 | [joplin-brain](joplin-brain/) | Self-filing second brain on Joplin: capture anything into INBOX in under ten seconds, file it on a schedule with a deterministic classifier, and answer with grounded retrieval from your own notes | Capture → daily FILER (dry-run default) → grounded ASK → AGENT LOG | `"save this to my second brain"` |
 
 ### Alternative: Install via Skills Hub CLI (Advanced)
@@ -107,6 +108,7 @@ Hermes-Skills/
 ├── social-poster/               # Direct OAuth social media posting
 ├── technical-trainer/           # Course creation pipeline
 ├── transcribe/                  # Local audio transcription pipeline
+├── gymcoach/                    # Personal fitness coach skill
 ├── joplin-brain/                # Self-filing second brain on Joplin
 ├── uk-business-consultant/      # UK business consultant skill
 ├── templates/                # Shared templates
