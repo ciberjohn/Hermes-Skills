@@ -249,14 +249,13 @@ def post_bluesky(text, image, vault):
 
 
 # ---------------------------------------------------------------- Mastodon
-def post_mastodon(text, image, vault, cfg):
+def post_mastodon(text, image, vault, cfg, description=""):
     v = vault.get("mastodon", {})
     tok = v.get("access_token", "")
     inst = v.get("instance") or cfg.get("mastodon", {}).get("instance", "")
     if not tok:
         return "no Mastodon token"
-    mp, ct = multipart({"description": "CyberMonday EP008 promo card: >10% chance AI kills "
-                                       "all of us this decade, with ciberjohn"},
+    mp, ct = multipart({"description": description or "Illustration"},
                        [("file", "card.jpg", image, "image/jpeg")])
     m = req(f"https://{inst}/api/v2/media", method="POST", data=mp,
             headers={"Authorization": f"Bearer {tok}", "Content-Type": ct})
@@ -296,7 +295,8 @@ def main():
     ap.add_argument("--image", required=True)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--media-title", default=CO_TITLE)
-    ap.add_argument("--media-description", default=CO_DESC)
+    ap.add_argument("--media-description", default="",
+                    help="alt text for the image; used by LinkedIn and Mastodon")
     ap.add_argument("--company-mention", default="required", choices=["required", "auto"])
     args = ap.parse_args()
 
@@ -326,7 +326,8 @@ def main():
             elif pl == "bluesky":
                 out = post_bluesky(text, image, vault)
             elif pl == "mastodon":
-                out = post_mastodon(text, image, vault, cfg)
+                out = post_mastodon(text, image, vault, cfg,
+                                    description=args.media_description)
             elif pl == "discord":
                 out = post_discord(text, image, cfg)
             else:
