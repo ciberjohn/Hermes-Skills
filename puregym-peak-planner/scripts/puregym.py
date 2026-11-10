@@ -694,6 +694,8 @@ def cmd_report(day: str | None, all_hours: bool = False) -> int:
         lines.append(f"Right now: {live} people in the gym.")
     elif live_failed:
         lines.append("_Live count unavailable — credentials or API need checking._")
+    else:
+        lines.append("_Counter offline — this brief is from the model, not a live reading._")
     for w in best:
         ppl = f" (~{int(w['people'])} people)" if (w["people"] and w["n"] >= 1) else ""
         conf = {"measured": "solid data", "emerging": "building data",
