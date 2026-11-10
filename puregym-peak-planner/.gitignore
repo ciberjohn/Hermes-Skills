@@ -1,0 +1,23 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Attendance data and cached bearer token — never commit
+data/
+*.sqlite
+*.sqlite-*
+puregym_token.json
+*.log
+
+# Local credentials and config
+config.env
+*.env
+.env
+pin
+secrets/
+credentials/
+
+# OS files
+.DS_Store
+Thumbs.db

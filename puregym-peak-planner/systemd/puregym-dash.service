@@ -1,0 +1,51 @@
+# Example unit for the PureGym quiet-hours dashboard.
+#
+# Install:
+#   sudo useradd --system --home /opt/puregym-dash --shell /usr/sbin/nologin puregym
+#   sudo mkdir -p /opt/puregym-dash/data
+#   sudo chown -R puregym:puregym /opt/puregym-dash
+#   sudo cp systemd/puregym-dash.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now puregym-dash
+#
+# The sampler syncs the database into /opt/puregym-dash/data, so the account
+# that runs the sync needs write access there too:
+#   sudo usermod -aG puregym "$USER"          # then log out and back in
+#   sudo chmod 2770 /opt/puregym-dash/data
+#
+# The app binds loopback only. Publish it over a private network:
+#   sudo tailscale serve --bg --https=8443 http://127.0.0.1:8099
+# Tailnet membership is then the only access gate — restrict it with Tailscale
+# ACLs if the tailnet is shared with other people.
+
+[Unit]
+Description=PureGym quiet-hours dashboard (loopback only)
+Documentation=https://github.com/ciberjohn/Hermes-Skills/tree/main/puregym-peak-planner
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=puregym
+Group=puregym
+WorkingDirectory=/opt/puregym-dash
+Environment=DASH_HOST=127.0.0.1
+Environment=DASH_PORT=8099
+Environment=GYM_NAME=PureGym
+Environment=GYM_ID=1234
+ExecStart=/usr/bin/python3 /opt/puregym-dash/app.py
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/puregym-dash/data
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+
+[Install]
+WantedBy=multi-user.target
