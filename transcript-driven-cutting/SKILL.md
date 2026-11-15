@@ -1,7 +1,7 @@
 ---
 name: transcript-driven-cutting
 description: "Use when cutting video from a word-level transcript."
-version: 1.0.0
+version: 1.1.0
 author: João Silva
 license: MIT
 platforms: [linux, darwin]
@@ -54,6 +54,7 @@ not care which ran.
 | Run | `hyperframes transcribe FILE -e parakeet --json` | `asr.py transcribe FILE` |
 | Speed | ~7x realtime on a 14-core CPU | ≈ realtime on 6 CPU cores (`small.en`) |
 | Output | transcript JSON written beside the file | transcript JSON, SRT on request |
+| Word key | `text` | `word` |
 | Needs a project | yes, one already set up | no, any file anywhere |
 | Languages | strong English, decent European | any language Whisper supports |
 | Best for | long footage inside an existing edit | a one-off file, non-English, subtitles |
@@ -61,6 +62,19 @@ not care which ran.
 Parakeet is the faster path when you are already working inside a HyperFrames project.
 `asr.py` is the path when you have a file and no project, when the audio is not English,
 or when you want an SRT out of the same pass.
+
+**Two schemas, one reader.** The engines disagree on one key: `asr.py` writes a word's
+surface text as `word`, Parakeet — and most Whisper tooling in the wild — writes it as
+`text`. `find` and `clips` accept either, so a transcript from the other engine needs no
+conversion:
+
+```json
+{"words": [{"text": "He", "start": 0.0, "end": 0.16}]}
+{"words": [{"word": "He", "start": 0.0, "end": 0.16}]}
+```
+
+Both `start` and `end` are required either way; segments are read the same way
+(`text`, or `word` if a tool says so) when there is no `words` array.
 
 ## Pipeline
 
@@ -116,6 +130,10 @@ Output shape (abridged):
 
 The `words` array is the whole point. Segments are for reading; words are for cutting.
 
+Read the surface text from either key — `word` (this script) or `text` (Parakeet,
+Whisper tooling) — so a transcript from the other engine drops straight into `find` and
+`clips` with no conversion step.
+
 **Model size, for cutting** (CPU, int8):
 
 | Model | Disk | Use it when |
@@ -164,38 +182,44 @@ recorded in a quiet room [2]       # the second time it is said
 161.530-164.120                    # or an explicit source range
 ```
 
-A range written by hand is snapped outward to whole words anyway. That is deliberate: it
-is the one class of mistake a listener hears every single time.
+A phrase is snapped outward to whole words, because a cut through a word is the one class
+of mistake a listener hears every single time. A range you typed is the opposite case: it
+is taken exactly as written, to the frame, because you already made that decision.
 
 ### 6. Turn the cut list into clip markup
 
 ```bash
 <venv>/bin/python scripts/asr.py clips take.transcript.json --cut-list cuts.txt \
-    --fps 25 --gap 0.25 --out take.clips.txt
+    --fps 25 --gap 0.25 --out take.clips.html
 ```
 
-```xml
-<!-- 2 clip(s) from take.mp4, transcript: take.transcript.json -->
-<!-- 1: The first take was unusable -->
-<clip src="take.mp4" in="0.000" out="2.120" timeline-in="0.000" timeline-out="2.120"/>
-<gap dur="0.250"/>
-<clip src="take.mp4" in="7.360" out="9.440" timeline-in="2.360" timeline-out="4.440"/>
+```html
+<video id="clip-00" class="clip" data-start="0.00" data-duration="2.12" data-media-start="0.00" data-has-audio="true" data-volume="1" src="take.mp4"></video>
+<video id="clip-01" class="clip" data-start="2.37" data-duration="2.08" data-media-start="7.36" data-has-audio="true" data-volume="1" src="take.mp4"></video>
 ```
 
-Four numbers per clip, and each one has one meaning:
+That is HyperFrames clip markup: one timed `<video>` element per clip, and nothing else on
+stdout, so it pastes straight into a composition. Each number has one meaning:
 
-- `in` / `out` — where to take the picture and sound *from* the source
-- `timeline-in` / `timeline-out` — where it *lands* on the finished timeline
-- `<gap>` — silence inserted between clips, so two sentences that were adjacent in the
-  source do not arrive butt-joined
+- `data-start` — where the clip *lands* on the finished timeline. `0` for the first, then
+  the previous `data-start` + previous `data-duration` + `--gap`. The gap lives in the
+  offsets, so there is no separate gap element to keep in step.
+- `data-duration` — out − in.
+- `data-media-start` — the source in-point, which is the trim.
+- `data-has-audio="true"` and `data-volume="1"` — the speaker's own sound is the point, so
+  the element is never `muted`.
 
-`--fps` snaps every number to a frame boundary at that rate, because a cut at 7.373 is
-not a cut at 25 fps; it is 7.360 with a rounding error waiting to show up in a render.
-`--lead` (0.15 s) and `--tail` (0.25 s) set the air around speech. Leave them alone
-unless you have listened and disagree.
+`id` is unique and zero padded (`clip-00`, `clip-01`, …), `src` is the `--source` value
+verbatim, and every value carries two decimals. The audit comment lines and the `--stats`
+timeline summary go to stderr; `--out` writes the same clean elements to a file and leaves
+stdout empty.
 
-The markup is plain enough to paste into whatever timeline DSL you use, and easy to map
-if yours names the attributes differently.
+`--fps` (default 25, `0` disables it) lands transcript timings on the frame grid, moving a
+boundary by less than half a frame — a cut at 7.373 is not a cut at 25 fps, it is 7.36 with
+a rounding error waiting to appear in a render. A range you typed is not re-timed at all:
+honoured as given, to the frame. `--lead` (0.15 s) and `--tail` (0.25 s) set the air around
+a *phrase* cut and never touch a typed range unless you pass them yourself. Leave them
+alone unless you have listened and disagree.
 
 ### 7. Render, then verify with silence
 
@@ -213,10 +237,10 @@ silence_start: 4.084263
 silence_end: 4.458231 | silence_duration: 0.373968
 ```
 
-Read it against the markup above: the first `silence_start` is **2.120**, which is exactly
-`timeline-out` of clip 1. The picture changed where the transcript said it would. If a
-`silence_start` lands 0.4 s before the number you planned, a cut is early and you fix the
-number, not the listener's patience.
+Read it against the markup above: the first `silence_start` is **2.119909**, which is clip
+1's `data-start + data-duration` — 2.120 — to the millisecond. The picture changed where
+the transcript said it would. If a `silence_start` lands 0.4 s before the number you
+planned, a cut is early and you fix the number, not the listener's patience.
 
 `-32dB` is the threshold that separates speech from room tone on ordinary recordings;
 `d=0.35` ignores the natural pauses inside a sentence, so only real boundaries are
@@ -259,8 +283,9 @@ actually support.
 - **Segment text is not cut text.** Cutting on segment boundaries gives you whatever
   length the decoder chose, usually 5-15 s, including the half-sentence it padded with.
   Cut on word boundaries; segments are for orientation.
-- **A cut can hide a word without deleting it.** If `in` and `out` both fall inside the
-  same word's span, the clip is a fragment. `clips --stats` warns below 0.4 s.
+- **A cut can hide a word without deleting it.** If `data-media-start` and
+  `data-media-start + data-duration` both fall inside the same word's span, the clip is a
+  fragment. `clips --stats` warns below 0.4 s.
 - **Long files.** `small.en` runs at about realtime on six CPU cores — measured: a 9.5 s
   clip decodes in 12-16 s including model load, and `tiny.en` took 4.7 s. So a 45-minute
   recording is a 45-70 minute job: run it in the background and say so, rather than
@@ -272,11 +297,12 @@ actually support.
 ## Verification Checklist
 
 - [ ] `ffprobe` confirmed an audio stream before the model run
-- [ ] transcript JSON has a non-empty `words` array and the language is right
+- [ ] transcript JSON has a non-empty `words` array (`word` or `text` keys) and the
+      language is right
 - [ ] every `find` result was read, not just used — `exact` or `fuzzy 0.9x`
-- [ ] no clip's `in`/`out` lands inside a word's span
+- [ ] no phrase cut lands inside a word's span (a range you typed is yours to judge)
 - [ ] clip durations are plausible for speech (0.4 s floor)
-- [ ] `silencedetect` on the render reports boundaries matching `timeline-out` values
+- [ ] `silencedetect` on the render reports boundaries matching `data-start + data-duration`
 - [ ] audio and picture are cut with the same numbers — a video-only trim desynchronises
 
 ## Files

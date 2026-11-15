@@ -5,11 +5,14 @@ One file, three subcommands, no service:
 
     transcribe   media file  ->  transcript JSON with word-level timings (+ optional SRT)
     find         transcript  ->  source in/out points for a spoken phrase
-    clips        transcript  ->  ready-to-paste clip markup from a cut list
+    clips        transcript  ->  timed <video> elements for a cut list
 
 `transcribe` needs the model runtime (faster-whisper + numpy) and ffmpeg on PATH.
 `find` and `clips` are pure standard library: they only read the JSON, so they run
 anywhere, including a machine that has never downloaded a model.
+
+`find` and `clips` read either transcript schema: the `word` key this script writes,
+or the `text` key Parakeet (inside HyperFrames) and most Whisper tooling write.
 
 The point of the whole exercise is that a cutting decision stops being an estimate.
 "About seven seconds in" becomes 6.98-7.41, and every later step -- trimming,
@@ -24,7 +27,7 @@ Model sizes, for cutting work on CPU (int8):
 Usage:
     asr.py transcribe talk.mp4
     asr.py find talk.transcript.json "the part about the second failure" --context 3
-    asr.py clips talk.transcript.json cuts.txt --fps 25 --out talk.clips.txt
+    asr.py clips talk.transcript.json --cut-list cuts.txt --fps 25 --out talk.clips.html
 """
 
 from __future__ import annotations
@@ -47,6 +50,8 @@ DEFAULT_MODEL = "small.en"
 DEFAULT_LEAD = 0.15          # air kept before the first word of a cut
 DEFAULT_TAIL = 0.25          # air kept after the last word: 0.2-0.3 s reads as natural
 DEFAULT_GAP = 0.25           # silence inserted between two timeline clips
+DEFAULT_FPS = 25.0           # frame rate used to snap transcript timings
+MIN_SPAN = 0.05              # a source span shorter than this is not a clip
 
 
 # --------------------------------------------------------------------------- #
@@ -173,20 +178,46 @@ def norm_word(text: str) -> str:
     return _STRIP.sub("", text.lower()).strip("'")
 
 
+def surface(entry: dict) -> str:
+    """The word as it was spoken, whichever schema wrote it down.
+
+    Our own `transcribe` writes `word`; Parakeet inside HyperFrames, and most
+    Whisper tooling in the wild, writes `text`. Read both -- `word` first, then
+    `text` -- so there is one place where the schema stops mattering.
+    """
+    return str(entry.get("word") or entry.get("text") or "").strip()
+
+
+def _timed(entry: dict) -> dict:
+    """One word entry, copied with `word` set and the timings as floats."""
+    word = dict(entry)
+    word["word"] = surface(entry)
+    word["start"] = float(entry["start"])
+    word["end"] = float(entry["end"])
+    return word
+
+
 def words_of(transcript: dict) -> list:
-    """Word list, or segments promoted to one-word entries with their own span."""
+    """Word list, or segments promoted to one-word entries with their own span.
+
+    Normalisation happens here, at the edge, so everything downstream -- locate,
+    context, cut resolution -- has a single key to trust and one code path.
+    Segments get the same treatment: `text` normally, `word` if a tool says so.
+    """
     if transcript.get("words"):
-        return transcript["words"]
+        return [_timed(word) for word in transcript["words"] if surface(word)]
+
     promoted = []
     for seg in transcript.get("segments", []):
-        parts = [p for p in seg.get("text", "").split() if p]
+        parts = [p for p in surface(seg).split() if p]
         if not parts:
             continue
-        step = (seg["end"] - seg["start"]) / len(parts)
+        start, end = float(seg["start"]), float(seg["end"])
+        step = (end - start) / len(parts)
         for index, part in enumerate(parts):
             promoted.append({
-                "start": seg["start"] + index * step,
-                "end": seg["start"] + (index + 1) * step,
+                "start": start + index * step,
+                "end": start + (index + 1) * step,
                 "word": part,
                 "probability": seg.get("avg_logprob"),
                 "promoted": True,
@@ -504,39 +535,50 @@ def parse_cut_line(line: str) -> dict:
 
 
 def resolve_cuts(words: list, cuts: list, fuzzy: float) -> tuple:
+    """Turn each cut into a source span.
+
+    A phrase is snapped outward to whole words: a cut that begins mid-word is
+    the one mistake a listener hears every time. An explicit in-out range is
+    not touched at all -- it is a decision someone already made, and the job
+    here is to honour it, not to improve it.
+    """
     resolved = []
     problems = []
     for position, cut in enumerate(cuts, start=1):
         if cut["kind"] == "range":
-            found = {"start": cut["start"], "end": cut["end"], "text": cut["label"],
-                     "score": 1.0, "exact": True}
-        else:
-            hits = locate(words, cut["phrase"], min_ratio=fuzzy)
-            if not hits:
-                problems.append("cut %d: no match for %r" % (position, cut["phrase"]))
-                continue
-            wanted = cut["occurrence"] or 1
-            if wanted > len(hits):
-                problems.append("cut %d: %r occurs %d time(s), asked for [%d]"
-                                % (position, cut["phrase"], len(hits), wanted))
-                continue
-            found = hits[wanted - 1]
+            resolved.append({
+                "kind": "range",
+                "start": cut["start"],
+                "end": cut["end"],
+                "text": cut["label"],
+                "score": 1.0,
+                "exact": True,
+            })
+            continue
 
-        # Snap outward to whole words. A cut that begins or ends mid-word is the
-        # one mistake a listener hears every single time.
+        hits = locate(words, cut["phrase"], min_ratio=fuzzy)
+        if not hits:
+            problems.append("cut %d: no match for %r" % (position, cut["phrase"]))
+            continue
+        wanted = cut["occurrence"] or 1
+        if wanted > len(hits):
+            problems.append("cut %d: %r occurs %d time(s), asked for [%d]"
+                            % (position, cut["phrase"], len(hits), wanted))
+            continue
+        found = hits[wanted - 1]
+
         overlapping = [w for w in words
                        if w["end"] > found["start"] + 0.001 and w["start"] < found["end"] - 0.001]
         if overlapping:
-            snapped_in = min(w["start"] for w in overlapping)
-            snapped_out = max(w["end"] for w in overlapping)
+            start = min(w["start"] for w in overlapping)
+            end = max(w["end"] for w in overlapping)
         else:
-            snapped_in, snapped_out = found["start"], found["end"]
+            start, end = found["start"], found["end"]
 
-        first = words[0]["start"]
-        last = words[-1]["end"] if words else snapped_out
         resolved.append({
-            "start": max(first, snapped_in),
-            "end": min(last, snapped_out),
+            "kind": "phrase",
+            "start": max(words[0]["start"], start),
+            "end": min(words[-1]["end"], end),
             "text": found.get("text", cut["label"]),
             "score": found.get("score", 1.0),
             "exact": found.get("exact", True),
@@ -546,10 +588,28 @@ def resolve_cuts(words: list, cuts: list, fuzzy: float) -> tuple:
     return resolved, problems
 
 
-def snap(value: float, fps: float) -> float:
+def snap(value: float, fps: float, typed: bool = False) -> float:
+    """Land a boundary on the frame grid, and express it to hundredths.
+
+    `typed=True` marks a value the caller wrote down: those are honoured as
+    given when they are already expressed to hundredths, because at 25 fps no
+    hundredth is a whole frame and moving one would change a decision already
+    made -- that is how an explicit `--cut 12.55-18.2` came out as 12.86-18.68.
+
+    Everything else is a transcript timing (three decimals, arbitrary) and is
+    snapped to the nearest frame. Either way a boundary never moves by half a
+    frame or more, and never by a third of a second.
+    """
+    value = float(value)
     if not fps:
-        return value
-    return round(value * fps) / fps
+        return round(value, 2)
+    if typed and abs(value * 100.0 - round(value * 100.0)) < 1e-6:
+        return round(value, 2)
+    frame = 1.0 / fps
+    nearest = round(value / frame) * frame
+    if abs(nearest - value) >= frame / 2.0:
+        return round(value, 2)
+    return round(nearest, 2)
 
 
 def cmd_clips(args: argparse.Namespace) -> int:
@@ -585,62 +645,87 @@ def cmd_clips(args: argparse.Namespace) -> int:
         die("no cut could be resolved against this transcript")
 
     source = args.source or transcript.get("source") or Path(args.transcript).name
+    fps = args.fps if args.fps and args.fps > 0 else 0.0
+    lead = DEFAULT_LEAD if args.lead is None else args.lead
+    tail = DEFAULT_TAIL if args.tail is None else args.tail
 
-    timeline = 0.0
     placements = []
     previous = None
     for cut in resolved:
-        in_point = max(0.0, cut["start"] - args.lead)
-        out_point = cut["end"] + args.tail
-        if previous is not None:
+        if cut["kind"] == "range":
+            # Typed in/out points are honoured as given, to the frame. Lead and
+            # tail are opt-in for a range, never inherited from the defaults.
+            in_point = cut["start"] - (args.lead or 0.0)
+            out_point = cut["end"] + (args.tail or 0.0)
+        else:
+            in_point = cut["start"] - lead
+            out_point = cut["end"] + tail
+        in_point = max(0.0, in_point)
+
+        if previous is not None and in_point < previous["end"]:
             # The lead air must not reach back into the previous clip's tail.
-            in_point = max(in_point, (previous["end"] + cut["start"]) / 2.0)
-            if in_point < previous["end"]:
-                warn("cut at %s starts before the previous one ends in the source; "
-                     "the same audio appears twice" % fmt_ts(cut["start"]))
-            timeline += args.gap
-        previous = cut
-        in_point = min(in_point, out_point - 0.05)
-        in_frame = snap(in_point, args.fps)
-        out_frame = snap(out_point, args.fps)
-        span = max(0.0, out_frame - in_frame)
+            warn("cut at %s starts before the previous one ends in the source; "
+                 "the same audio appears twice" % fmt_ts(cut["start"]))
+            if cut["kind"] != "range":
+                in_point = (previous["end"] + cut["start"]) / 2.0
+
+        in_point = min(in_point, out_point - MIN_SPAN)
+        typed = cut["kind"] == "range"
+        in_frame = snap(in_point, fps, typed=typed)
+        out_frame = snap(out_point, fps, typed=typed)
+        duration = round(max(0.0, out_frame - in_frame), 2)
+
+        # data-start is the running timeline offset: nothing before the first
+        # clip, then previous start + previous duration + the gap.
+        if placements:
+            start = round(placements[-1]["start"] + placements[-1]["duration"] + args.gap, 2)
+        else:
+            start = 0.0
+
         placements.append({
-            "in": in_frame, "out": out_frame, "span": span,
-            "timeline_in": snap(timeline, args.fps),
-            "timeline_out": snap(timeline + span, args.fps),
+            "start": start,
+            "duration": duration,
+            "media_start": in_frame,
+            "media_out": out_frame,
             "text": cut["text"],
         })
-        timeline += span
+        previous = cut
 
-    lines = ["<!-- %d clip(s) from %s, transcript: %s -->" % (
-        len(placements), source, Path(args.transcript).name)]
-    for number, clip in enumerate(placements, start=1):
-        if number > 1 and args.gap > 0:
-            lines.append('<gap dur="%s"/>' % fmt_ts(args.gap))
-        if not args.plain:
+    # HyperFrames reads timed elements, so that is what goes to stdout: one
+    # <video> per clip and nothing else, ready to paste into a composition.
+    body = "".join(
+        '<video id="clip-%02d" class="clip" data-start="%.2f" data-duration="%.2f" '
+        'data-media-start="%.2f" data-has-audio="true" data-volume="1" src="%s"></video>\n'
+        % (index, clip["start"], clip["duration"], clip["media_start"], source)
+        for index, clip in enumerate(placements)
+    )
+    total = round(placements[-1]["start"] + placements[-1]["duration"], 2) if placements else 0.0
+
+    if not args.plain:
+        print("# %d clip(s) from %s, transcript: %s" % (
+            len(placements), source, Path(args.transcript).name), file=sys.stderr)
+        for index, clip in enumerate(placements):
             spoken = " ".join(clip["text"].split())
             if len(spoken) > 70:
                 spoken = spoken[:67] + "..."
-            lines.append("<!-- %d: %s -->" % (number, spoken))
-        lines.append('<clip src="%s" in="%s" out="%s" timeline-in="%s" timeline-out="%s"/>'
-                     % (source, fmt_ts(clip["in"]), fmt_ts(clip["out"]),
-                        fmt_ts(clip["timeline_in"]), fmt_ts(clip["timeline_out"])))
-    markup = "\n".join(lines) + "\n"
-    total = placements[-1]["timeline_out"] if placements else 0.0
+            print("# clip-%02d timeline %s-%s, source %s-%s: %s" % (
+                index, fmt_ts(clip["start"]), fmt_ts(clip["start"] + clip["duration"]),
+                fmt_ts(clip["media_start"]), fmt_ts(clip["media_out"]), spoken),
+                file=sys.stderr)
 
     if args.out:
-        Path(args.out).expanduser().write_text(markup)
-        print("CLIPS:%s" % Path(args.out).expanduser())
+        Path(args.out).expanduser().write_text(body)
+        print("CLIPS:%s" % Path(args.out).expanduser(), file=sys.stderr)
     else:
-        print(markup)
+        sys.stdout.write(body)
 
     if args.stats:
-        print("timeline: %s (%.3fs), %d clip(s), %.2fs gap each" % (
+        print("timeline: %s (%.2fs), %d clip(s), %.2fs gap each" % (
             fmt_clock(total), total, len(placements), args.gap), file=sys.stderr)
-        for number, clip in enumerate(placements, start=1):
-            if clip["span"] < 0.4:
-                warn("clip %d is only %.2fs -- shorter than a word, check the source" % (
-                    number, clip["span"]))
+        for index, clip in enumerate(placements):
+            if clip["duration"] < 0.4:
+                warn("clip-%02d is only %.2fs -- shorter than a word, check the source" % (
+                    index, clip["duration"]))
         if placements:
             print("\nverify the finished render -- speech should start and stop where these say:",
                   file=sys.stderr)
@@ -696,16 +781,20 @@ def build_parser() -> argparse.ArgumentParser:
     clips.add_argument("--cut-list", default=None, help="file, one cut per line")
     clips.add_argument("--cut", action="append", default=None,
                        help="a cut inline: a phrase or an in-out range (repeatable)")
-    clips.add_argument("--lead", type=float, default=DEFAULT_LEAD, help="air before each cut")
-    clips.add_argument("--tail", type=float, default=DEFAULT_TAIL, help="air after each cut")
+    clips.add_argument("--lead", type=float, default=None,
+                       help="air before a phrase cut (default %s); a typed in-out "
+                            "range gets none unless you pass this" % DEFAULT_LEAD)
+    clips.add_argument("--tail", type=float, default=None,
+                       help="air after a phrase cut (default %s); a typed in-out "
+                            "range gets none unless you pass this" % DEFAULT_TAIL)
     clips.add_argument("--gap", type=float, default=DEFAULT_GAP,
                        help="silence between clips on the timeline (default 0.25)")
-    clips.add_argument("--fps", type=float, default=None,
-                       help="snap to frame boundaries at this rate (e.g. 25, 29.97, 30)")
+    clips.add_argument("--fps", type=float, default=DEFAULT_FPS,
+                       help="frame rate used to snap transcript timings (default 25; 0 disables)")
     clips.add_argument("--source", default=None, help="source file name used in the markup")
     clips.add_argument("--out", default=None, help="write markup here instead of stdout")
     clips.add_argument("--plain", action="store_true",
-                       help="omit the per-clip comment lines from the markup")
+                       help="omit the audit comment lines from stderr")
     clips.add_argument("--fuzzy", type=float, default=0.72, help="phrase match threshold")
     clips.add_argument("--stats", action="store_true", help="timeline summary on stderr")
     clips.set_defaults(func=cmd_clips)

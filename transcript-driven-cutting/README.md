@@ -21,13 +21,16 @@ the same word-level timings.
   Whisper as a standalone sidecar — OpenAI's weights through faster-whisper/CTranslate2,
   CPU int8, any language, SRT export, works on any file without a project.
 - **`asr.py`, one file, three subcommands.** `transcribe` a file, `find` a spoken phrase
-  and get its in/out points, `clips` turn a cut list into ready-to-paste clip markup with
-  source and timeline positions and the gaps between them. `find` and `clips` are pure
-  standard library — they read the JSON and run on a machine that has never downloaded a
-  model.
+  and get its in/out points, `clips` turn a cut list into HyperFrames clip markup — one
+  timed `<video>` element per clip, with the trim and the gap between clips carried in the
+  offsets. `find` and `clips` are pure standard library — they read the JSON and run on a
+  machine that has never downloaded a model. They read either transcript schema, `word`
+  (this script) or `text` (Parakeet and most Whisper tooling), so a transcript from the
+  other engine needs no conversion.
 - **Cuts that cannot start mid-word.** Phrases resolve on word boundaries and are snapped
-  outward to whole words; hand-written ranges are snapped too, because a word clipped in
-  half is the one mistake a listener hears every time.
+  outward to whole words, because a word clipped in half is the one mistake a listener
+  hears every time. A range you typed is the opposite case and is taken exactly as given,
+  to the frame.
 - **Verification that is evidence, not opinion.** `ffmpeg -af silencedetect=noise=-32dB:d=0.35`
   on the finished render reports where the audio actually goes quiet, and those numbers
   should match the timeline positions the cut list produced.
@@ -38,16 +41,18 @@ the same word-level timings.
    before a model run.
 2. **Extract** 16 kHz mono PCM to a WAV you own. One known-good decode path for a phone
    clip, a screen recording, a 48 kHz camera file.
-3. **Transcribe** to JSON with a `words` array — each word carrying `start`, `end` and a
-   probability. Segments are for reading; words are for cutting.
+3. **Transcribe** to JSON with a `words` array — each word carrying `start`, `end` and its
+   surface text under `word` (this script) or `text` (Parakeet, Whisper tooling), both of
+   which `find` and `clips` read. Segments are for reading; words are for cutting.
 4. **Locate** the phrase you want. Exact match on normalised words first; a similarity
    fallback labelled `fuzzy 0.9x` for when the transcript says "there's" and you typed
    "there is".
 5. **Cut list** — one cut per line: a phrase, a phrase with an occurrence `[2]`, or an
    explicit `in-out` range.
-6. **Clip markup** — `in`, `out`, `timeline-in`, `timeline-out` per clip, `<gap>` between
-   them, optionally frame-snapped at 25/29.97/30 fps. Plain enough to paste into whatever
-   timeline DSL you use.
+6. **Clip markup** — one timed `<video>` element per clip, HyperFrames' own shape:
+   `data-start`, `data-duration`, `data-media-start`, `data-has-audio="true"`,
+   `data-volume="1"`. Frame-snapped at 25 fps by default; a typed range is honoured as
+   given. Nothing but those elements reaches stdout.
 7. **Verify** the render with silence detection and compare the reported boundaries to
    the numbers you planned.
 
@@ -134,16 +139,22 @@ recorded in a quiet room [2]
 161.530-164.120
 ```
 
-Markup out:
+Markup out — HyperFrames clip markup, one element per clip and nothing else on stdout:
 
-```xml
-<!-- 2 clip(s) from take.mp4, transcript: take.transcript.json -->
-<!-- 1: The first take was unusable -->
-<clip src="take.mp4" in="0.000" out="2.120" timeline-in="0.000" timeline-out="2.120"/>
-<gap dur="0.250"/>
-<!-- 2: recorded in a quiet room. -->
-<clip src="take.mp4" in="7.360" out="9.440" timeline-in="2.360" timeline-out="4.440"/>
+```html
+<video id="clip-00" class="clip" data-start="0.00" data-duration="2.12" data-media-start="0.00" data-has-audio="true" data-volume="1" src="take.mp4"></video>
+<video id="clip-01" class="clip" data-start="2.37" data-duration="2.08" data-media-start="7.36" data-has-audio="true" data-volume="1" src="take.mp4"></video>
 ```
+
+`data-start` is the running timeline offset — `0` for the first clip, then the previous
+`data-start` + previous `data-duration` + `--gap`, so the silence between clips lives in the
+offsets rather than in a separate element. `data-duration` is out − in, and
+`data-media-start` is where picture and sound are taken from the source. Ids are unique and
+zero padded, `src` is `--source` verbatim, values carry two decimals, and the element is
+never `muted`: the speaker's own sound is the point.
+
+The audit comment lines and the `--stats` timeline summary go to stderr, so stdout stays
+pasteable and `--out` writes the same clean elements to a file.
 
 Then verify the render — this output is from a real 4.45 s render of those two clips:
 
@@ -158,9 +169,9 @@ silence_start: 4.084263
 silence_end: 4.458231 | silence_duration: 0.373968
 ```
 
-The first `silence_start` is 2.120 — exactly `timeline-out` of clip 1. The picture changed
-where the transcript said it would, and that is a fact you can show rather than a feeling
-you can defend.
+The first `silence_start` is 2.120 — exactly clip 1's `data-start + data-duration`
+(0.00 + 2.12). The picture changed where the transcript said it would, and that is a fact
+you can show rather than a feeling you can defend.
 
 ## What's included
 
