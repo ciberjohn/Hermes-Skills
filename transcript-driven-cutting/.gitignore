@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Virtual environments with the model runtime
+.venv/
+venv/
+env/
+
+# Model weights — hundreds of MB, re-downloadable, never worth committing
+models/
+*.bin
+*.pt
+*.ct2
+*.onnx
+*.gguf
+cache/
+.cache/
+
+# Transcripts and cut lists describe what someone actually said: keep them local
+*.transcript.json
+*.transcript.srt
+*.srt
+*.vtt
+cuts.txt
+*.clips.txt
+
+# Media, including the audio the transcript was made from
+*.mp4
+*.mov
+*.mkv
+*.webm
+*.wav
+*.mp3
+*.m4a
+*.flac
+*.aac
+render/
+
+# Secrets and local config
+.env
+.env.*
+secrets/
+credentials/
+
+# OS files
+.DS_Store
+Thumbs.db

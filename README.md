@@ -38,6 +38,7 @@ Once installed, the skill is available as a slash command (`/medium-story`, `/sh
 | [jev](jev/) | Typed, calibrated decisions from TypeSafe's Jev (System One) model — a choice, a score, or a yes/no probability instead of an LLM text call. For routing, classification, extraction, ranking, guardrails and gating | State + typed questions → `/v1/systemone` → typed answers → code branches | `"use the jev skill"` |
 | [paperclip-creator](paperclip-creator/) | Deploys Paperclip — the open-source agent-company platform — into a container and wires a Hermes Agent profile in as a worker. Front-loads the traps that make a healthy self-hosted install look broken: a browser API that needs a secure context, an HTTPS cookie policy, organisation-prefixed routes, and adapter transport rules | Decide → deploy → HTTPS → bootstrap + lock registration → wire the Hermes gateway → verify | `"deploy paperclip"` |
 | [proxmox-estate](proxmox-estate/) | One operational playbook for a Proxmox host: inventory LXC containers and QEMU VMs, place a workload by credential surface rather than free RAM, deploy and harden it, expose it over HTTPS on a private overlay, and prove a backup restores. Includes the VM story (`qm`) alongside LXC, and the failure modes that look like success — sizing from a ceiling, a build "failing" on a echoed log line, and a backup that decompresses but holds no data | Recon → security gate → placement → size → VM/LXC ops → rollback + backups → install + harden → HTTPS → verify | `"deploy this on my PVE estate"` |
+| [transcript-driven-cutting](transcript-driven-cutting/) | Cuts video from word-level timings instead of estimates: transcribe locally first with Parakeet (HyperFrames CLI) or Whisper (faster-whisper sidecar), locate a spoken phrase to the millisecond, turn a cut list into frame-snapped clip markup with source and timeline in/out plus gaps, then prove the render with silence detection. Ships `asr.py` — `transcribe`, `find`, `clips` | probe → extract 16 kHz mono → transcribe → find phrase → clips → render → verify | `"cut this to the good take"` |
 
 ### Alternative: Install via Skills Hub CLI (Advanced)
 
@@ -119,6 +120,7 @@ Hermes-Skills/
 ├── jev/                      # Typed decisions via TypeSafe's Jev (System One)
 ├── paperclip-creator/        # Self-hosted agent-company platform + Hermes gateway wiring
 ├── proxmox-estate/           # Proxmox LXC + VM estate: deploy, operate, back up, restore
+├── transcript-driven-cutting/# Word-level transcript → cut list → clip markup → verified render
 ├── templates/                # Shared templates
 │   └── persona-template.md   # Writing voice template
 └── scripts/                  # Shared scripts
