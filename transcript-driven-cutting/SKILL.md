@@ -11,7 +11,20 @@ metadata:
     related_skills: [transcribe, short-videos]
 ---
 
-# Transcript-Driven Cutting
+# Transcript-Driven Cutting — a HyperFrames add-on
+
+**Where this sits.** [HyperFrames](https://github.com/heygen-com/hyperframes) is the
+open-source HTML→MP4 video studio: install it, drive it with your own local Hermes
+agent and your own model, and you can edit footage, build motion graphics, add
+voiceover, render MP4s and publish them — the whole HyperFrames toolset, on your
+hardware, with the rushes never leaving the machine. What that agent lacks is an ear.
+This add-on supplies it: Hermes transcribes the raw videos first, gets word-level
+timings, and therefore makes better editing decisions — cuts on sentence boundaries,
+air where it meant to put air, captions that cannot drift from the picture.
+
+Adopt it when you already use HyperFrames (or want to): everything below feeds that
+workflow. The transcription and phrase-finding steps are editor-agnostic, so they are
+useful even if the final render happens somewhere else.
 
 A video agent has no ears. It cannot watch a file and know where a sentence starts; it
 can only guess, and a guess is what produces a cut that begins on the last phoneme of

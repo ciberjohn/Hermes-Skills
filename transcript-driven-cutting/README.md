@@ -1,4 +1,12 @@
-# Transcript-Driven Cutting
+# HyperFrames add-on: Transcript-Driven Cutting
+
+**An add-on for [HyperFrames](https://github.com/heygen-com/hyperframes).** Install
+HyperFrames, point your own local Hermes agent at it with your own model, and you can
+edit video, build motion graphics, record voiceover, render and publish — everything
+HyperFrames allows, on your own machine, without sending the rushes anywhere. What that
+agent cannot do is *hear*. This skill closes that gap: Hermes transcribes the raw footage
+first and gets word-level timings for every syllable, so the editing decisions it makes
+are measured instead of guessed.
 
 Cut video against numbers, not estimates. Transcribe the recording locally first, and
 every decision after that — which sentence to keep, where the clip starts, how much air
@@ -13,6 +21,11 @@ the same word-level timings.
 > from the picture.
 
 **Pipeline:** probe → extract 16 kHz mono → transcribe to word-level JSON → locate the phrase → cut list → clip markup → render → verify with silence detection.
+
+**Works without HyperFrames too.** Step 4 (`find`) and the transcription step are
+engine- and editor-agnostic: point them at any recording and you get JSON, SRT and
+in/out points you can take to any NLE. Only the final `clips` output speaks
+HyperFrames' format, because that is the editor this add-on is built to feed.
 
 ## What you get
 
