@@ -1,0 +1,22 @@
+# Secrets and local config
+.env
+*.env
+secrets/
+credentials/
+*.token
+auth_token
+pin
+
+# Runtime state
+data/
+*.jsonl
+attempts.json
+__pycache__/
+*.pyc
+*.pyo
+
+# Editors and OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

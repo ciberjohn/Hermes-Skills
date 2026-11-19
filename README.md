@@ -39,6 +39,7 @@ Once installed, the skill is available as a slash command (`/medium-story`, `/sh
 | [paperclip-creator](paperclip-creator/) | Deploys Paperclip — the open-source agent-company platform — into a container and wires a Hermes Agent profile in as a worker. Front-loads the traps that make a healthy self-hosted install look broken: a browser API that needs a secure context, an HTTPS cookie policy, organisation-prefixed routes, and adapter transport rules | Decide → deploy → HTTPS → bootstrap + lock registration → wire the Hermes gateway → verify | `"deploy paperclip"` |
 | [proxmox-estate](proxmox-estate/) | One operational playbook for a Proxmox host: inventory LXC containers and QEMU VMs, place a workload by credential surface rather than free RAM, deploy and harden it, expose it over HTTPS on a private overlay, and prove a backup restores. Includes the VM story (`qm`) alongside LXC, and the failure modes that look like success — sizing from a ceiling, a build "failing" on a echoed log line, and a backup that decompresses but holds no data | Recon → security gate → placement → size → VM/LXC ops → rollback + backups → install + harden → HTTPS → verify | `"deploy this on my PVE estate"` |
 | [transcript-driven-cutting](transcript-driven-cutting/) | **HyperFrames add-on.** Install HyperFrames, drive it with your own local Hermes agent and model, and you can edit video, build motion graphics, add voiceover, render and publish — everything HyperFrames allows. This skill adds the ear it lacks: transcribe the raw footage locally first, then cut on word-level timings instead of estimates. Locate a spoken phrase to the millisecond, turn a cut list into frame-snapped HyperFrames clip markup, and prove the render with silence detection. Ships `asr.py` — `transcribe`, `find`, `clips` | probe → extract 16 kHz mono → transcribe → find phrase → clips → render → verify | `"cut this to the good take"` |
+| [phone-agent-front-door](phone-agent-front-door/) | Puts a Twilio voice menu in front of your own AI agent: cached answers on digits 1 and 2, a six-digit PIN before the agent on digit 4, and a trust boundary that holds because the write functions were never written. Ships a working FastAPI gateway, a pre-flight that writes nothing, the four-shape secrets ladder, and the four failures that cost a working day (number region, signing token, blank parameters, proxy URL) | prerequisites → number region → secrets ladder → HTTPS → menu-first gateway → verify without dialling → harden | `"put my agent behind a phone number"` |
 
 ### Alternative: Install via Skills Hub CLI (Advanced)
 
@@ -121,6 +122,7 @@ Hermes-Skills/
 ├── paperclip-creator/        # Self-hosted agent-company platform + Hermes gateway wiring
 ├── proxmox-estate/           # Proxmox LXC + VM estate: deploy, operate, back up, restore
 ├── transcript-driven-cutting/ # HyperFrames add-on: word-level transcript → cut list → clip markup → verified render
+├── phone-agent-front-door/   # Twilio voice IVR in front of your own agent
 ├── templates/                # Shared templates
 │   └── persona-template.md   # Writing voice template
 └── scripts/                  # Shared scripts
